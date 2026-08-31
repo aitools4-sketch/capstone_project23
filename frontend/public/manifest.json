@@ -1,0 +1,17 @@
+{
+  "name": "Breached: AI-Powered Digital Identity Leak Scanner",
+  "short_name": "Breached",
+  "description": "Check whether your email has been exposed in a data breach and get an AI-powered risk score with clear steps to reduce your exposure.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#0a0a0a",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

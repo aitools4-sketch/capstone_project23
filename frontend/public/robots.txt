@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /auth
+
+# Replace with the real deployed domain once this is live —
+# the Sitemap directive requires a fully-qualified URL.
+# Sitemap: https://your-domain.example/sitemap.xml

@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Identity Risk Report</title>
+<style>
+  @page { size: A4; margin: 22mm 18mm 20mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif;
+    color: #1a1a1a;
+    font-size: 10.5pt;
+    line-height: 1.55;
+    margin: 0;
+  }
+  header.doc-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid #111;
+    padding-bottom: 6mm;
+    margin-bottom: 10mm;
+  }
+  .brand { font-size: 13pt; font-weight: 700; letter-spacing: -0.01em; }
+  .doc-meta { text-align: right; font-size: 8.5pt; color: #777; }
+
+  h1.report-title { font-size: 22pt; font-weight: 700; margin: 0 0 2mm; letter-spacing: -0.01em; }
+  p.report-sub { font-size: 10.5pt; color: #555; margin: 0 0 12mm; }
+
+  .score-row {
+    display: flex;
+    align-items: center;
+    gap: 10mm;
+    border: 1px solid #ddd;
+    border-radius: 3mm;
+    padding: 8mm;
+    margin-bottom: 10mm;
+  }
+  .score-number { font-size: 34pt; font-weight: 700; line-height: 1; }
+  .score-band {
+    display: inline-block;
+    margin-top: 2mm;
+    font-size: 8.5pt;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 1mm 3mm;
+    border-radius: 3mm;
+  }
+  .band-high { background: #fde8e8; color: #a4222b; }
+  .band-moderate { background: #fef3e2; color: #9a5b0a; }
+  .band-low { background: #e7f7ec; color: #1b7a3d; }
+  .score-detail { font-size: 9.5pt; color: #555; }
+
+  h2.section-title {
+    font-size: 13pt;
+    font-weight: 700;
+    margin: 0 0 4mm;
+    padding-top: 4mm;
+    border-top: 1px solid #eee;
+  }
+  section:first-of-type h2.section-title { border-top: none; padding-top: 0; }
+
+  table.breach-table { width: 100%; border-collapse: collapse; font-size: 9.5pt; margin-bottom: 8mm; }
+  table.breach-table th {
+    text-align: left;
+    font-size: 8pt;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #888;
+    border-bottom: 1px solid #ccc;
+    padding: 2mm 3mm;
+  }
+  table.breach-table td { padding: 2.5mm 3mm; border-bottom: 1px solid #eee; vertical-align: top; }
+  .sev-badge {
+    display: inline-block;
+    font-size: 7.5pt;
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 0.5mm 2mm;
+    border-radius: 2mm;
+  }
+
+  .no-breaches { color: #777; font-style: italic; margin-bottom: 8mm; }
+
+  .insight-box { background: #f7f7f7; border-radius: 3mm; padding: 6mm; margin-bottom: 8mm; font-size: 9.8pt; }
+  .insight-box p { margin: 0 0 3mm; }
+  ol.recommendations { margin: 3mm 0 0; padding-left: 5mm; }
+  ol.recommendations li { margin-bottom: 2mm; }
+  .rec-impact { color: #777; font-size: 8.5pt; }
+
+  footer.doc-footer {
+    margin-top: 14mm;
+    padding-top: 4mm;
+    border-top: 1px solid #ddd;
+    font-size: 7.8pt;
+    color: #999;
+  }
+</style>
+</head>
+<body>
+
+  <header class="doc-header">
+    <span class="brand">Breached</span>
+    <span class="doc-meta">Identity Risk Report<br/>Generated {{ generated_at }}</span>
+  </header>
+
+  <h1 class="report-title">{{ email }}</h1>
+  <p class="report-sub">Scan performed {{ scan_date }} &middot; {{ breaches|length }} breach{{ '' if breaches|length == 1 else 'es' }} found</p>
+
+  <div class="score-row">
+    <div>
+      <div class="score-number">{{ risk.total }}<span style="font-size:14pt;font-weight:400;color:#999;">/100</span></div>
+      <span class="score-band band-{{ risk.classification }}">{{ risk.classification }}</span>
+    </div>
+    <p class="score-detail">
+      Computed from the sensitivity of exposed fields, how recently each breach occurred, and how many
+      separate breaches this email appears in.
+    </p>
+  </div>
+
+  <section>
+    <h2 class="section-title">Breaches found</h2>
+    {% if breaches %}
+    <table class="breach-table">
+      <thead>
+        <tr><th>Source</th><th>Date</th><th>Exposed data</th><th>Severity</th></tr>
+      </thead>
+      <tbody>
+        {% for b in breaches %}
+        <tr>
+          <td>{{ b.breach_name }}</td>
+          <td>{{ b.breach_date or 'Unknown' }}</td>
+          <td>{{ b.exposed_fields|join(', ') }}</td>
+          <td><span class="sev-badge band-{{ 'high' if b.severity == 'high' else ('moderate' if b.severity == 'medium' else 'low') }}">{{ b.severity }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="no-breaches">No breaches were found for this email at the time of the scan.</p>
+    {% endif %}
+  </section>
+
+  {% if insight %}
+  <section>
+    <h2 class="section-title">AI insight</h2>
+    <div class="insight-box">
+      <p>{{ insight.explanation }}</p>
+      {% if insight.recommendations %}
+      <ol class="recommendations">
+        {% for r in insight.recommendations %}
+        <li><strong>{{ r.title }}.</strong> {{ r.detail }} <span class="rec-impact">({{ r.impact }})</span></li>
+        {% endfor %}
+      </ol>
+      {% endif %}
+    </div>
+  </section>
+  {% endif %}
+
+  <footer class="doc-footer">
+    This report reflects breach data verified by DeHashed and Have I Been Pwned as of the scan date above.
+    It is not a guarantee of complete exposure history. Generated by Breached, an identity breach monitoring
+    tool, for personal record-keeping.
+  </footer>
+
+</body>
+</html>
