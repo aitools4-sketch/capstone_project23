@@ -10,6 +10,13 @@ import { MOCK_PREVENTIVE_TIPS, MOCK_RECOMMENDATIONS, simulateScan, type Recommen
 import { runScan, type ScanResult } from '../lib/scanApi'
 
 const SAMPLE_ID = 'sample'
+// This list is always blurred and locked behind a sign-in overlay — it's
+// only ever meant to gesture at "here's roughly what we found," not to be
+// read. Rendering the full list anyway (some real scans return hundreds of
+// breaches) made the page absurdly long for no visible benefit, since none
+// of it is legible past the blur. Capped so the preview's height stays
+// reasonable regardless of how many breaches a real scan turns up.
+const PREVIEW_BREACH_COUNT = 6
 
 function sampleResult(email: string): ScanResult {
   const breaches = simulateScan(email)
@@ -311,7 +318,7 @@ function ResultsPage() {
 
             <div className="relative mt-10 overflow-hidden rounded-2xl border border-white/8">
               <ul className="divide-y divide-white/6 blur-[3px]" aria-hidden="true">
-                {breaches.map((b) => (
+                {breaches.slice(0, PREVIEW_BREACH_COUNT).map((b) => (
                   <li key={`${b.source}-${b.breach_name}`} className="flex items-center justify-between px-6 py-4 text-left">
                     <div>
                       <p className="text-sm font-medium text-ink">{b.breach_name}</p>
