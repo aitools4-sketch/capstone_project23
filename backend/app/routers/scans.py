@@ -7,6 +7,7 @@ from ..db import get_service_client
 from ..rate_limit import limiter
 from ..services.breach_lookup import BreachLookupFailed, BreachLookupNotConfigured, BreachRecord
 from ..services.insights import InsightContent, InsightGenerationFailed, InsightNotConfigured, get_insight_generator
+from ..services.masking import mask_for_guest
 from ..services.risk_scoring import RiskResult, classify_risk
 from ..services.scanning import run_and_record_scan
 from ..services.usage import record_call
@@ -22,6 +23,7 @@ class ScanResult(BaseModel):
     id: str
     email: EmailStr
     breaches: list[BreachRecord]
+    total_breach_count: int
     risk: RiskResult
 
 
@@ -54,6 +56,17 @@ def create_scan(
     our own trained model, so nothing returned to the browser or written to
     the database ever originated from something the caller claimed. See
     breached-architecture blueprint §1 and §4.
+
+    The full result is always recorded (see run_and_record_scan) regardless
+    of auth state — a guest scan that gets claimed later via magic-link
+    sign-in must show its complete original result once claimed, with no
+    special-casing. Only the HTTP response to a guest is reduced, down to
+    what the results page already shows visually (see masking.py's
+    mask_for_guest): real breach names/dates/fields for the first
+    GUEST_PREVIEW_COUNT breaches, with the true total carried separately in
+    total_breach_count. This closes the gap where the "sign in to see full
+    report" preview was previously a CSS blur only — the complete list was
+    always present in the JSON response for anyone to read regardless.
     """
     try:
         result = run_and_record_scan(
@@ -73,7 +86,14 @@ def create_scan(
             detail=f"Breach lookup failed upstream and returned no usable result: {exc}",
         ) from exc
 
-    return ScanResult(id=result.id, email=result.email, breaches=result.breaches, risk=result.risk)
+    response_breaches = result.breaches if current_user else mask_for_guest(result.breaches)
+    return ScanResult(
+        id=result.id,
+        email=result.email,
+        breaches=response_breaches,
+        total_breach_count=len(result.breaches),
+        risk=result.risk,
+    )
 
 
 @router.get("/scans/me")

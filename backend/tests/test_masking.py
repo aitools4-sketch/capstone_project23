@@ -1,11 +1,11 @@
 from app.services.breach_lookup import BreachRecord
-from app.services.masking import mask_all, mask_for_response
+from app.services.masking import GUEST_PREVIEW_COUNT, mask_all, mask_for_guest, mask_for_response
 
 
-def _record(exposed_fields: list[str]) -> BreachRecord:
+def _record(exposed_fields: list[str], breach_name: str = "Example Co") -> BreachRecord:
     return BreachRecord(
         source="DeHashed",
-        breach_name="Example Co",
+        breach_name=breach_name,
         breach_date="2024-01-01",
         exposed_fields=exposed_fields,
         severity="high",
@@ -39,3 +39,20 @@ def test_mask_all_preserves_record_count_and_order_independent_fields():
     masked = mask_all(records)
     assert len(masked) == 2
     assert masked[0].breach_name == "Example Co"
+
+
+def test_mask_for_guest_truncates_to_the_preview_count():
+    records = [_record(["email"], breach_name=f"Breach {i}") for i in range(GUEST_PREVIEW_COUNT + 4)]
+    guest_view = mask_for_guest(records)
+    assert len(guest_view) == GUEST_PREVIEW_COUNT
+    assert [r.breach_name for r in guest_view] == [f"Breach {i}" for i in range(GUEST_PREVIEW_COUNT)]
+
+
+def test_mask_for_guest_still_applies_display_labels():
+    guest_view = mask_for_guest([_record(["password"])])
+    assert guest_view[0].exposed_fields == ["Plaintext password exposed"]
+
+
+def test_mask_for_guest_leaves_a_short_list_untouched():
+    records = [_record(["email"], breach_name="Only One")]
+    assert len(mask_for_guest(records)) == 1

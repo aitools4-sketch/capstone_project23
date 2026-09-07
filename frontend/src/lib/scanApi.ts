@@ -21,6 +21,9 @@ export type ScanResult = {
   id: string
   email: string
   breaches: ScanBreach[]
+  /** The true number of breaches found — may exceed breaches.length for a
+   * guest (not signed in) response, which the server caps to a preview. */
+  total_breach_count: number
   risk: ScanRisk
 }
 

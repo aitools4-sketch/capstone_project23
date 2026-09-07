@@ -44,3 +44,19 @@ def mask_for_response(record: BreachRecord) -> BreachRecord:
 
 def mask_all(records: list[BreachRecord]) -> list[BreachRecord]:
     return [mask_for_response(r) for r in records]
+
+
+# Keep in sync with frontend/src/pages/ResultsPage.tsx's PREVIEW_BREACH_COUNT
+# — that's the number of rows the guest results page already renders
+# (blurred) today. This makes that limit real at the network layer instead
+# of trusting a CSS blur someone could read past via devtools.
+GUEST_PREVIEW_COUNT = 6
+
+
+def mask_for_guest(records: list[BreachRecord]) -> list[BreachRecord]:
+    """What an unauthenticated scan response includes: the labels are
+    already display-safe via mask_all, this just caps how many records
+    come with them. The true count still travels separately
+    (ScanResult.total_breach_count in routers/scans.py) — this only limits
+    which entries carry full name/date/field detail."""
+    return mask_all(records)[:GUEST_PREVIEW_COUNT]

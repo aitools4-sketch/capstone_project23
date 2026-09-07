@@ -31,6 +31,7 @@ function sampleResult(email: string): ScanResult {
       exposed_fields: b.dataTypes,
       severity: b.severity,
     })),
+    total_breach_count: breaches.length,
     risk: { total, sensitivity: 20, recency: 14, frequency: 6, severity: 2, classification: total >= 40 ? 'moderate' : 'low' },
   }
 }
@@ -265,8 +266,8 @@ function ResultsPage() {
 
   if (!result) return null
 
-  const { breaches } = result
-  const isClean = breaches.length === 0
+  const { breaches, total_breach_count: totalBreachCount } = result
+  const isClean = totalBreachCount === 0
 
   return (
     <div className="min-h-dvh text-ink">
@@ -307,13 +308,13 @@ function ResultsPage() {
         ) : (
           <>
             <h1 className="mt-2 text-4xl font-semibold tracking-tight text-ink sm:text-5xl">
-              Found in {breaches.length} breaches
+              Found in {totalBreachCount} breaches
             </h1>
             <p className="mt-3 text-ink-muted">
               Here&apos;s a preview. Sign in to see full details and your AI risk score.
             </p>
 
-            <BreachMetric count={breaches.length} />
+            <BreachMetric count={totalBreachCount} />
 
             <div className="relative mt-10 overflow-hidden rounded-2xl border border-white/8">
               <ul className="divide-y divide-white/6 blur-[3px]" aria-hidden="true">
