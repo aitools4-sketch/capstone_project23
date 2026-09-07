@@ -2,6 +2,7 @@ services:
   - type: web
     name: breached-api
     runtime: docker
+    rootDir: backend
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
     plan: free
