@@ -4,8 +4,6 @@ import { rowHover } from '../../components/interactive'
 import { fetchMyScans, type MyScan } from '../../lib/scanHistoryApi'
 import type { ScanBreach } from '../../lib/scanApi'
 
-type Tab = 'breach' | 'stealer_log'
-
 function BreachTable({ rows, emptyLabel }: { rows: ScanBreach[]; emptyLabel: string }) {
   if (rows.length === 0) {
     return (
@@ -44,7 +42,6 @@ function BreachTable({ rows, emptyLabel }: { rows: ScanBreach[]; emptyLabel: str
 }
 
 function BreachesPage() {
-  const [tab, setTab] = useState<Tab>('breach')
   const [scans, setScans] = useState<MyScan[] | null>(null)
   const [loadError, setLoadError] = useState(false)
   const hasFetchedRef = useRef(false)
@@ -58,37 +55,12 @@ function BreachesPage() {
   }, [])
 
   const breaches = scans?.[0]?.breaches ?? []
-  const verified = breaches.filter((b) => b.record_type === 'breach')
-  const stealerLogs = breaches.filter((b) => b.record_type === 'stealer_log')
 
   return (
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight text-ink">Breaches</h1>
-        <p className="mt-1 text-sm text-ink-muted">
-          Everywhere your monitored email has turned up: verified breaches and malware-captured credentials alike.
-        </p>
-      </div>
-
-      <div className="inline-flex w-fit rounded-full border border-white/10 bg-white/3 p-1 text-sm">
-        <button
-          type="button"
-          onClick={() => setTab('breach')}
-          className={`rounded-full px-4 py-1.5 font-medium transition-colors duration-150 ${
-            tab === 'breach' ? 'bg-white/10 text-ink' : 'text-ink-muted hover:text-ink'
-          }`}
-        >
-          Verified breaches
-        </button>
-        <button
-          type="button"
-          onClick={() => setTab('stealer_log')}
-          className={`rounded-full px-4 py-1.5 font-medium transition-colors duration-150 ${
-            tab === 'stealer_log' ? 'bg-white/10 text-ink' : 'text-ink-muted hover:text-ink'
-          }`}
-        >
-          Stealer log captures
-        </button>
+        <p className="mt-1 text-sm text-ink-muted">Everywhere your monitored email has turned up.</p>
       </div>
 
       {loadError ? (
@@ -99,13 +71,8 @@ function BreachesPage() {
         <p className="rounded-2xl border border-white/8 bg-white/3 px-6 py-10 text-center text-sm text-ink-faint">
           Loading…
         </p>
-      ) : tab === 'breach' ? (
-        <BreachTable rows={verified} emptyLabel="No verified breaches found in your most recent scan." />
       ) : (
-        <BreachTable
-          rows={stealerLogs}
-          emptyLabel="No stealer log captures found in your most recent scan."
-        />
+        <BreachTable rows={breaches} emptyLabel="No breaches found in your most recent scan." />
       )}
     </div>
   )

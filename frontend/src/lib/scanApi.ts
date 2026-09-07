@@ -6,7 +6,6 @@ export type ScanBreach = {
   breach_date: string | null
   exposed_fields: string[]
   severity: 'low' | 'medium' | 'high'
-  record_type: 'breach' | 'stealer_log'
 }
 
 export type ScanRisk = {

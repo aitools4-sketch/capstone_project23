@@ -6,7 +6,6 @@ process using our own API keys, never by re-serializing something the caller
 claimed. See breached-architecture blueprint §1 and §4.
 """
 
-import logging
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Literal
 
@@ -16,8 +15,6 @@ from pydantic import BaseModel
 from ..config import Settings
 from .sensitivity import classify_severity
 from .usage import record_call
-
-logger = logging.getLogger(__name__)
 
 # Shared across every request instead of a fresh httpx.Client per scan —
 # lets keep-alive connections to DeHashed and HIBP actually get reused
@@ -33,7 +30,6 @@ class BreachRecord(BaseModel):
     breach_date: str | None = None
     exposed_fields: list[str]
     severity: Literal["low", "medium", "high"]
-    record_type: Literal["breach", "stealer_log"] = "breach"
 
 
 class BreachLookupNotConfigured(Exception):
@@ -129,7 +125,6 @@ class HIBPClient:
     breaches DeHashed hasn't indexed."""
 
     BASE_URL = "https://haveibeenpwned.com/api/v3/breachedaccount"
-    STEALER_LOGS_BASE_URL = "https://haveibeenpwned.com/api/v3/stealerlogsbyemail"
 
     def __init__(self, api_key: str, client: httpx.Client | None = None):
         self._api_key = api_key
@@ -158,45 +153,9 @@ class HIBPClient:
                     breach_date=breach_date,
                     exposed_fields=fields,
                     severity=classify_severity(fields),
-                    # HIBP tags each breach at the source — same field hibp_catalog.py
-                    # reads for the public catalog. Only present with
-                    # truncateResponse=false, which search() above already passes.
-                    record_type="stealer_log" if entry.get("IsStealerLog") else "breach",
                 )
             )
         return records
-
-    def search_stealer_logs(self, email: str) -> list[str]:
-        """HIBP's Pro-tier endpoint — unlike search() above, this only
-        works for an email whose domain has been verified on HIBP's
-        dashboard; every other domain gets a 403. lookup_breaches() below
-        checks that before ever calling this, so a 403 reaching here means
-        the verified-domain assumption no longer holds (lapsed tier,
-        dashboard changed) rather than "wrong email"."""
-        response = self._client.get(
-            f"{self.STEALER_LOGS_BASE_URL}/{email}",
-            headers={"hibp-api-key": self._api_key, "User-Agent": "Breached-Scanner/1.0"},
-        )
-        if response.status_code in (404, 403):
-            return []
-        response.raise_for_status()
-        return response.json()
-
-    def to_stealer_log_records(self, domains: list[str]) -> list[BreachRecord]:
-        # The endpoint only ever confirms "a login for this domain was
-        # captured" — password is the one field that's always true of a
-        # stealer capture (that's what makes it one); HIBP doesn't say
-        # whether autofill data, cookies, etc. came with it.
-        return [
-            BreachRecord(
-                source="HIBP Stealer Logs",
-                breach_name=domain,
-                exposed_fields=["password"],
-                severity=classify_severity(["password"]),
-                record_type="stealer_log",
-            )
-            for domain in domains
-        ]
 
 
 def normalize_hibp_class(data_class: str) -> str:
@@ -236,13 +195,6 @@ def _merge_by_breach_name(records: list[BreachRecord]) -> list[BreachRecord]:
             update={
                 "exposed_fields": fields,
                 "severity": classify_severity(fields),
-                # Either source flagging it as a stealer log wins — DeHashed
-                # defaults every record to "breach", so without this an
-                # untagged DeHashed copy processed first would silently
-                # overwrite HIBP's "stealer_log" tag for the same breach.
-                "record_type": "stealer_log"
-                if "stealer_log" in (existing.record_type, record.record_type)
-                else "breach",
                 "breach_date": existing.breach_date or record.breach_date,
                 "source": f"{existing.source} + {record.source}" if existing.source != record.source else existing.source,
             }
@@ -266,24 +218,6 @@ def _fetch_hibp(email: str, api_key: str) -> tuple[list[BreachRecord], str | Non
         return [], f"HIBP: {exc}"
 
 
-def _email_domain_matches(email: str, verified_domain: str) -> bool:
-    _, _, domain = email.rpartition("@")
-    return domain.lower() == verified_domain.strip().lower()
-
-
-def _fetch_hibp_stealer_logs(email: str, api_key: str) -> list[BreachRecord]:
-    """Best-effort bonus source, deliberately kept out of lookup_breaches()'s
-    failure accounting: it's only ever attempted for one verified domain,
-    so it failing must never take down a scan that DeHashed/HIBP otherwise
-    served fine for everyone else."""
-    try:
-        hibp = HIBPClient(api_key, client=_SHARED_CLIENT)
-        return hibp.to_stealer_log_records(hibp.search_stealer_logs(email))
-    except httpx.HTTPError as exc:
-        logger.warning("HIBP stealer log lookup failed for verified domain: %s", exc)
-        return []
-
-
 def lookup_breaches(email: str, settings: Settings) -> list[BreachRecord]:
     """The single entry point every caller (the scan endpoint, the
     notification worker) uses. Same code path regardless of trigger — see
@@ -301,14 +235,11 @@ def lookup_breaches(email: str, settings: Settings) -> list[BreachRecord]:
     record_call("breach_search", settings.daily_search_warning_threshold)
 
     jobs = []
-    stealer_log_job = None
-    with ThreadPoolExecutor(max_workers=3) as pool:
+    with ThreadPoolExecutor(max_workers=2) as pool:
         if settings.dehashed_api_key:
             jobs.append(pool.submit(_fetch_dehashed, email, settings.dehashed_api_key))
         if settings.hibp_api_key:
             jobs.append(pool.submit(_fetch_hibp, email, settings.hibp_api_key))
-            if settings.hibp_verified_domain and _email_domain_matches(email, settings.hibp_verified_domain):
-                stealer_log_job = pool.submit(_fetch_hibp_stealer_logs, email, settings.hibp_api_key)
 
         records: list[BreachRecord] = []
         failures: list[str] = []
@@ -317,9 +248,6 @@ def lookup_breaches(email: str, settings: Settings) -> list[BreachRecord]:
             records.extend(recs)
             if failure:
                 failures.append(failure)
-
-        if stealer_log_job:
-            records.extend(stealer_log_job.result())
 
     attempted = len(jobs)
     # A source failing shouldn't take down a working one — but if every

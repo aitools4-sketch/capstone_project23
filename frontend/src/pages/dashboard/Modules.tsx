@@ -10,7 +10,6 @@ import { fetchMyScans, type MyScan } from '../../lib/scanHistoryApi'
 function relevantCategories(scan: MyScan | undefined): Set<LearningModule['category']> {
   const categories = new Set<LearningModule['category']>()
   for (const b of scan?.breaches ?? []) {
-    if (b.record_type === 'stealer_log') categories.add('malware')
     for (const field of b.exposed_fields) {
       if (field.toLowerCase().includes('password')) categories.add('password')
       if (field === 'Payment card exposed' || field === 'Bank account exposed') categories.add('financial')

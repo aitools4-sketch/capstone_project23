@@ -30,7 +30,6 @@ function sampleResult(email: string): ScanResult {
       breach_date: b.date,
       exposed_fields: b.dataTypes,
       severity: b.severity,
-      record_type: 'breach',
     })),
     risk: { total, sensitivity: 20, recency: 14, frequency: 6, severity: 2, classification: total >= 40 ? 'moderate' : 'low' },
   }
