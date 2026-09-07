@@ -14,6 +14,13 @@ class Settings(BaseSettings):
     dehashed_api_key: str | None = None
     hibp_api_key: str | None = None
 
+    # Optional — the single domain verified on HIBP's dashboard for the
+    # Pro-tier stealer log lookup (see breach_lookup.py's
+    # search_stealer_logs). HIBP 403s that endpoint for any email outside
+    # this domain, so it's only ever called when a scan's email matches —
+    # leave unset to skip it entirely.
+    hibp_verified_domain: str | None = None
+
     # Optional — AI insights are disabled (returns 503) until this is set.
     anthropic_api_key: str | None = None
 

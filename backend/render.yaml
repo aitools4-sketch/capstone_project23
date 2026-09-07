@@ -17,6 +17,8 @@ services:
         sync: false
       - key: HIBP_API_KEY
         sync: false
+      - key: HIBP_VERIFIED_DOMAIN
+        sync: false
       - key: ANTHROPIC_API_KEY
         sync: false
       - key: RESEND_API_KEY

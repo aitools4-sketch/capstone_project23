@@ -1,4 +1,10 @@
-from app.services.breach_lookup import BreachRecord, HIBPClient, _merge_by_breach_name, normalize_hibp_class
+from app.services.breach_lookup import (
+    BreachRecord,
+    HIBPClient,
+    _email_domain_matches,
+    _merge_by_breach_name,
+    normalize_hibp_class,
+)
 
 
 def test_normalize_hibp_class_known_mappings():
@@ -73,3 +79,30 @@ def test_hibp_to_breach_records_tags_stealer_log_entries():
     assert by_name["RedLine Stealer Logs"] == "stealer_log"
     assert by_name["Adobe"] == "breach"
     assert by_name["Canva"] == "breach"
+
+
+def test_email_domain_matches_is_case_insensitive():
+    assert _email_domain_matches("Jane@Example.COM", "example.com")
+    assert not _email_domain_matches("jane@gmail.com", "example.com")
+
+
+def test_email_domain_matches_tolerates_verified_domain_whitespace():
+    assert _email_domain_matches("jane@example.com", "  example.com  ")
+
+
+def test_email_domain_matches_does_not_match_subdomains():
+    # HIBP's own domain-verification model is exact-domain, not "*.example.com" —
+    # matching a subdomain here would call an endpoint HIBP will 403 anyway.
+    assert not _email_domain_matches("jane@mail.example.com", "example.com")
+
+
+def test_hibp_to_stealer_log_records_are_high_severity_and_tagged():
+    records = HIBPClient(api_key="unused").to_stealer_log_records(["netflix.com", "spotify.com"])
+    assert [r.breach_name for r in records] == ["netflix.com", "spotify.com"]
+    assert all(r.record_type == "stealer_log" for r in records)
+    assert all(r.severity == "high" for r in records)
+    assert all(r.source == "HIBP Stealer Logs" for r in records)
+
+
+def test_hibp_to_stealer_log_records_empty_list_yields_no_records():
+    assert HIBPClient(api_key="unused").to_stealer_log_records([]) == []
