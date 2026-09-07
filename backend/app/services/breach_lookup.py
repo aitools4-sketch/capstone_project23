@@ -154,6 +154,10 @@ class HIBPClient:
                     breach_date=breach_date,
                     exposed_fields=fields,
                     severity=classify_severity(fields),
+                    # HIBP tags each breach at the source — same field hibp_catalog.py
+                    # reads for the public catalog. Only present with
+                    # truncateResponse=false, which search() above already passes.
+                    record_type="stealer_log" if entry.get("IsStealerLog") else "breach",
                 )
             )
         return records
@@ -196,6 +200,13 @@ def _merge_by_breach_name(records: list[BreachRecord]) -> list[BreachRecord]:
             update={
                 "exposed_fields": fields,
                 "severity": classify_severity(fields),
+                # Either source flagging it as a stealer log wins — DeHashed
+                # defaults every record to "breach", so without this an
+                # untagged DeHashed copy processed first would silently
+                # overwrite HIBP's "stealer_log" tag for the same breach.
+                "record_type": "stealer_log"
+                if "stealer_log" in (existing.record_type, record.record_type)
+                else "breach",
                 "breach_date": existing.breach_date or record.breach_date,
                 "source": f"{existing.source} + {record.source}" if existing.source != record.source else existing.source,
             }

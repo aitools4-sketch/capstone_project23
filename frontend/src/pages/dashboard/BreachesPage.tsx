@@ -104,7 +104,7 @@ function BreachesPage() {
       ) : (
         <BreachTable
           rows={stealerLogs}
-          emptyLabel="Stealer log detection isn't available yet — check back soon. This tab isn't a result of your scan."
+          emptyLabel="No stealer log captures found in your most recent scan."
         />
       )}
     </div>
