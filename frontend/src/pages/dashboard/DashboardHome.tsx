@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import RiskGauge from '../../components/app/RiskGauge'
+import RiskTrendChart from '../../components/app/RiskTrendChart'
 import SeverityBadge from '../../components/app/SeverityBadge'
 import { SparkleIcon } from '../../components/icons'
 import { cardHover, rowHover, underlineLink } from '../../components/interactive'
@@ -60,7 +61,10 @@ function DashboardHome() {
             ) : !scans ? (
               <p className="text-sm text-ink-faint">Loading…</p>
             ) : latest ? (
-              <RiskGauge score={latest.risk_score} />
+              <>
+                <RiskGauge score={latest.risk_score} />
+                <RiskTrendChart scores={[...scans].reverse().map((s) => s.risk_score)} />
+              </>
             ) : (
               <p className="text-center text-sm text-ink-faint">Run a scan to see your risk score.</p>
             )}
