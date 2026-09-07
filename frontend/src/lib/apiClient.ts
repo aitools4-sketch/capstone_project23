@@ -77,6 +77,10 @@ export async function apiPostAuthed<T>(path: string, body: unknown): Promise<T> 
   return (await request(path, { method: 'POST', body, authed: true })).json() as Promise<T>
 }
 
+export async function apiPutAuthed<T>(path: string, body: unknown): Promise<T> {
+  return (await request(path, { method: 'PUT', body, authed: true })).json() as Promise<T>
+}
+
 export async function apiPostForBlobAuthed(path: string, body: unknown): Promise<Blob> {
   return (await request(path, { method: 'POST', body, authed: true })).blob()
 }

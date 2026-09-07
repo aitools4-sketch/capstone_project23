@@ -1,7 +1,14 @@
-"""Periodic re-scan worker (blueprint Phase 3). Re-checks every signed-in
-user's most recently scanned email against fresh breach data, and for
-anyone with a breach that wasn't there last time, records a new scan
-snapshot, writes a notification row, and emails an alert.
+"""Periodic re-scan worker (blueprint Phase 3). Re-checks every verified
+monitored email (see monitored_emails.py — an account's own login email is
+auto-verified on sign-up; additional ones need an explicit confirmation
+click) against fresh breach data, and for anyone with a breach that wasn't
+there last time, records a new scan snapshot, writes a notification row,
+and emails an alert.
+
+An account can monitor more than one email, so the unit of work here is
+"one verified (user_id, email) pair," not "one user" — a single account
+with three monitored emails gets checked, diffed, and (if warranted)
+notified independently for each one.
 
 DeHashed's own monitoring API would do this watching server-side without
 us polling on a schedule, but that tier isn't active on this account (see
@@ -22,23 +29,41 @@ from .risk_scoring import get_risk_scorer
 logger = logging.getLogger(__name__)
 
 
-def _dedupe_latest_per_user(rows: list[dict]) -> list[dict]:
-    """rows must already be ordered most-recent-first. Pulled out of
-    _latest_scan_per_user so the dedup rule is testable without a live
-    Supabase client — see tests/test_notifier.py."""
-    seen: set[str] = set()
-    latest = []
+def _dedupe_latest_per_email(rows: list[dict]) -> dict[str, dict]:
+    """rows must already be ordered most-recent-first. Returns each email's
+    most recent scan, keyed by email — pulled out of _latest_scan_by_email
+    so the dedup rule is testable without a live Supabase client, same
+    reasoning as before this was keyed by user_id instead (see
+    tests/test_notifier.py)."""
+    latest: dict[str, dict] = {}
     for row in rows:
-        if row["user_id"] not in seen:
-            seen.add(row["user_id"])
-            latest.append(row)
+        if row["email"] not in latest:
+            latest[row["email"]] = row
     return latest
 
 
-def _latest_scan_per_user(client) -> list[dict]:
-    """One row per user_id: their most recent scan. supabase-py has no
+def _email_alerts_enabled(client, user_id: str) -> bool:
+    """No row is the common case (most users never visit the setting) and
+    means unchanged from the default — enabled, same as before this
+    preference existed. Mirrors routers/notification_preferences.py's GET
+    handler; kept separate since one is Supabase-backed request code and
+    the other is this module's plain service-role read."""
+    rows = (
+        client.table("notification_preferences")
+        .select("email_alerts_enabled")
+        .eq("user_id", user_id)
+        .limit(1)
+        .execute()
+        .data
+    )
+    return rows[0]["email_alerts_enabled"] if rows else True
+
+
+def _latest_scan_by_email(client) -> dict[str, dict]:
+    """Every email's most recent scan, keyed by email. supabase-py has no
     "distinct on" through the REST client, so this dedupes client-side —
-    fine at this project's scale (one row per user, not per scan)."""
+    fine at this project's scale (one bulk query, not one per monitored
+    email)."""
     rows = (
         client.table("scans")
         .select("*")
@@ -47,23 +72,42 @@ def _latest_scan_per_user(client) -> list[dict]:
         .execute()
         .data
     )
-    return _dedupe_latest_per_user(rows)
+    return _dedupe_latest_per_email(rows)
+
+
+def _verified_monitored_emails(client) -> list[dict]:
+    return (
+        client.table("monitored_emails")
+        .select("user_id, email")
+        .not_.is_("verified_at", "null")
+        .execute()
+        .data
+    )
 
 
 def check_for_new_breaches(settings: Settings) -> int:
-    """Runs one full pass over every user. Returns how many got a new
-    notification, for logging visibility into each scheduled run."""
+    """Runs one full pass over every verified monitored email. Returns how
+    many got a new notification, for logging visibility into each
+    scheduled run."""
     client = get_service_client()
     notified = 0
 
-    for scan in _latest_scan_per_user(client):
-        user_id, email = scan["user_id"], scan["email"]
+    latest_by_email = _latest_scan_by_email(client)
+
+    for monitored in _verified_monitored_emails(client):
+        user_id, email = monitored["user_id"], monitored["email"]
+        known_scan = latest_by_email.get(email)
+        # No prior scan (a freshly verified email the notifier hasn't
+        # gotten to yet) means nothing is "known" — every breach found on
+        # this first pass is correctly treated as new, not skipped.
         # A handful of pre-Phase-1 rows predate the current BreachRecord
         # shape entirely (client-submitted mock data from before breach
         # detection moved server-side) — skip anything that doesn't look
         # like a real breach entry rather than letting one bad row crash
         # the whole run.
-        known_names = {b["breach_name"] for b in scan["breaches"] if "breach_name" in b}
+        known_names = (
+            {b["breach_name"] for b in known_scan["breaches"] if "breach_name" in b} if known_scan else set()
+        )
 
         try:
             fresh_breaches = lookup_breaches(email, settings)
@@ -110,12 +154,13 @@ def check_for_new_breaches(settings: Settings) -> int:
             )
             continue
 
-        try:
-            send_breach_alert_email(email, masked_new, settings)
-        except EmailNotConfigured:
-            pass  # notification row still exists on the dashboard either way
-        except Exception as exc:
-            logger.warning("notifier: email delivery failed for %s: %s", email, exc)
+        if _email_alerts_enabled(client, user_id):
+            try:
+                send_breach_alert_email(email, masked_new, settings)
+            except EmailNotConfigured:
+                pass  # notification row still exists on the dashboard either way
+            except Exception as exc:
+                logger.warning("notifier: email delivery failed for %s: %s", email, exc)
 
         notified += 1
 
