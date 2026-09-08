@@ -67,11 +67,11 @@ def add_monitored_email(user_id: str, email: str, settings: Settings) -> dict:
         f'<p><a href="{verify_url}">Confirm this email</a> to start monitoring it. '
         "If you didn't request this, ignore this message and nothing will be monitored.</p>"
     )
-    # The row is already committed above — a failure here (missing key, or a
-    # sandbox Resend account that can only deliver to its own verified
-    # address) must not look like the whole add failed and must not orphan
-    # the row in limbo with no way to tell the caller what happened. It's
-    # still real and still pending; only the email attempt was best-effort.
+    # The row is already committed above — a failure here (missing key, rate
+    # limit, Resend rejecting the address, a network blip) must not look
+    # like the whole add failed and must not orphan the row in limbo with no
+    # way to tell the caller what happened. It's still real and still
+    # pending; only the email attempt was best-effort.
     try:
         send_email(email, "Confirm this email for breach monitoring", html, settings)
     except EmailNotConfigured:
