@@ -9,6 +9,14 @@ import { useAuth } from '../../lib/useAuth'
 import { fetchMyScans, type MyScan } from '../../lib/scanHistoryApi'
 import { fetchMyNotifications, type BreachNotification } from '../../lib/notificationsApi'
 
+/** This card is a quick-glance widget next to Risk score, AI insight, and
+ * Notifications — not the place to read a full breach list (that's
+ * /dashboard/breaches, linked via "View all" below). A real scan can
+ * return hundreds of breaches; rendering all of them here made the whole
+ * Overview page absurdly tall for no benefit, since a glance card was
+ * never meant to be scrolled through. */
+const DASHBOARD_BREACH_PREVIEW_COUNT = 5
+
 function SectionHeader({ title, action, to }: { title: string; action?: string; to?: string }) {
   return (
     <div className="flex items-center justify-between">
@@ -83,15 +91,25 @@ function DashboardHome() {
                 No breaches found in your most recent scan.
               </p>
             ) : (
-              breaches.map((b) => (
-                <div key={`${b.source}-${b.breach_name}`} className={`flex items-center justify-between rounded-lg px-4 py-3 ${rowHover}`}>
-                  <div>
-                    <p className="text-sm font-medium text-ink">{b.breach_name}</p>
-                    <p className="text-xs text-ink-faint">{b.breach_date ?? 'Date unknown'}</p>
+              <>
+                {breaches.slice(0, DASHBOARD_BREACH_PREVIEW_COUNT).map((b) => (
+                  <div key={`${b.source}-${b.breach_name}`} className={`flex items-center justify-between rounded-lg px-4 py-3 ${rowHover}`}>
+                    <div>
+                      <p className="text-sm font-medium text-ink">{b.breach_name}</p>
+                      <p className="text-xs text-ink-faint">{b.breach_date ?? 'Date unknown'}</p>
+                    </div>
+                    <SeverityBadge severity={b.severity} />
                   </div>
-                  <SeverityBadge severity={b.severity} />
-                </div>
-              ))
+                ))}
+                {breaches.length > DASHBOARD_BREACH_PREVIEW_COUNT && (
+                  <Link
+                    to="/dashboard/breaches"
+                    className={`block rounded-lg px-4 py-3 text-center text-xs font-medium text-ink-muted ${rowHover} hover:text-ink`}
+                  >
+                    +{breaches.length - DASHBOARD_BREACH_PREVIEW_COUNT} more — view all
+                  </Link>
+                )}
+              </>
             )}
           </div>
         </div>
