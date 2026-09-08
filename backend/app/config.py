@@ -10,12 +10,6 @@ class Settings(BaseSettings):
     supabase_service_role_key: str
     allowed_origins: str = "http://localhost:5173"
 
-    # Where a monitored-email verification link points the browser (see
-    # services/monitored_emails.py) — distinct from allowed_origins, which
-    # is a CORS allowlist and may hold several origins at once with no
-    # single one being "the" frontend.
-    frontend_url: str = "http://localhost:5173"
-
     # Optional — breach lookup is disabled (returns 503) until these are set.
     dehashed_api_key: str | None = None
     hibp_api_key: str | None = None

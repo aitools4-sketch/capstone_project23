@@ -11,16 +11,7 @@ from slowapi.errors import RateLimitExceeded
 from .config import get_settings
 from .db import get_service_client
 from .rate_limit import limiter
-from .routers import (
-    account,
-    breach_catalog,
-    monitored_emails,
-    notification_preferences,
-    notifications,
-    notify,
-    reports,
-    scans,
-)
+from .routers import account, breach_catalog, notifications, notify, reports, scans
 from .services.notifier import check_for_new_breaches
 from .services.report_pdf import shutdown_browser
 from .services.risk_scoring import get_risk_scorer
@@ -73,7 +64,7 @@ app.state.limiter = limiter
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.allowed_origins_list,
-    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_methods=["GET", "POST", "DELETE"],
     allow_headers=["Authorization", "Content-Type"],
 )
 
@@ -91,8 +82,6 @@ app.include_router(breach_catalog.router, prefix="/api")
 app.include_router(reports.router, prefix="/api")
 app.include_router(account.router, prefix="/api")
 app.include_router(notifications.router, prefix="/api")
-app.include_router(notification_preferences.router, prefix="/api")
-app.include_router(monitored_emails.router, prefix="/api")
 
 
 @app.get("/health")

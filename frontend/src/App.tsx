@@ -18,8 +18,6 @@ const DashboardHome = lazy(() => import('./pages/dashboard/DashboardHome'))
 const FaqPage = lazy(() => import('./pages/FaqPage'))
 const InsightsPage = lazy(() => import('./pages/dashboard/InsightsPage'))
 const MissionPage = lazy(() => import('./pages/MissionPage'))
-const MonitoredEmailsPage = lazy(() => import('./pages/dashboard/MonitoredEmailsPage'))
-const MonitoredEmailVerifyPage = lazy(() => import('./pages/MonitoredEmailVerifyPage'))
 const Modules = lazy(() => import('./pages/dashboard/Modules'))
 const ModulesPage = lazy(() => import('./pages/ModulesPage'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
@@ -59,7 +57,6 @@ function App() {
             <Route path="/breach-intelligence/:name" element={<BreachDetailPage />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/auth/callback" element={<AuthCallbackPage />} />
-            <Route path="/monitored-emails/verify" element={<MonitoredEmailVerifyPage />} />
             <Route
               path="/dashboard"
               element={
@@ -75,7 +72,6 @@ function App() {
               <Route path="scans" element={<ScanRecordsPage />} />
               <Route path="modules" element={<Modules />} />
               <Route path="password-check" element={<PasswordCheckPage />} />
-              <Route path="monitored-emails" element={<MonitoredEmailsPage />} />
               <Route path="account" element={<AccountPage />} />
             </Route>
 
