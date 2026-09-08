@@ -5,6 +5,18 @@ import { formatRelativeTime } from '../../lib/format'
 import { type BreachNotification, fetchMyNotifications, markNotificationRead } from '../../lib/notificationsApi'
 import { fetchMyNotificationPreferences, updateMyNotificationPreferences } from '../../lib/notificationPreferencesApi'
 
+// A single re-scan can turn up a large batch of newly-matched breaches at
+// once (e.g. the first check against a heavily-exposed email) — joining
+// every name into one sentence made a notification card an unreadable
+// wall of text. Named a handful, the rest summarized as a count.
+const NOTIFICATION_NAMES_SHOWN = 5
+
+function describeBreaches(names: string[]): string {
+  if (names.length <= NOTIFICATION_NAMES_SHOWN) return names.join(', ')
+  const shown = names.slice(0, NOTIFICATION_NAMES_SHOWN).join(', ')
+  return `${shown}, and ${names.length - NOTIFICATION_NAMES_SHOWN} more`
+}
+
 function EmailAlertsToggle() {
   const [enabled, setEnabled] = useState<boolean | null>(null)
   const hasFetchedRef = useRef(false)
@@ -106,10 +118,15 @@ function NotificationsPage() {
               </span>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-4">
-                  <p className="text-sm font-medium text-ink">New breach found</p>
+                  <p className="text-sm font-medium text-ink">
+                    {n.breach_names.length === 1 ? 'New breach found' : `${n.breach_names.length} new breaches found`}
+                  </p>
                   <span className="shrink-0 text-xs text-ink-faint">{formatRelativeTime(n.created_at)}</span>
                 </div>
-                <p className="mt-1 text-sm text-ink-muted">{n.breach_names.join(', ')} now matches your monitored email.</p>
+                <p className="mt-1 text-sm text-ink-muted">
+                  {describeBreaches(n.breach_names)} now match{n.breach_names.length === 1 ? 'es' : ''} your monitored
+                  email.
+                </p>
               </div>
               {!n.read && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-accent" />}
             </button>
