@@ -9,12 +9,15 @@ is its own simple token-based confirmation over the existing transactional
 email pipeline (email_sender.py, already Resend-backed).
 """
 
+import logging
 import uuid
 from datetime import datetime, timezone
 
 from ..config import Settings
 from ..db import get_service_client
-from .email_sender import send_email
+from .email_sender import EmailNotConfigured, send_email
+
+logger = logging.getLogger(__name__)
 
 MAX_MONITORED_EMAILS = 5
 
@@ -64,7 +67,17 @@ def add_monitored_email(user_id: str, email: str, settings: Settings) -> dict:
         f'<p><a href="{verify_url}">Confirm this email</a> to start monitoring it. '
         "If you didn't request this, ignore this message and nothing will be monitored.</p>"
     )
-    send_email(email, "Confirm this email for breach monitoring", html, settings)
+    # The row is already committed above — a failure here (missing key, or a
+    # sandbox Resend account that can only deliver to its own verified
+    # address) must not look like the whole add failed and must not orphan
+    # the row in limbo with no way to tell the caller what happened. It's
+    # still real and still pending; only the email attempt was best-effort.
+    try:
+        send_email(email, "Confirm this email for breach monitoring", html, settings)
+    except EmailNotConfigured:
+        logger.warning("monitored_emails: RESEND_API_KEY not set, no confirmation email sent to %s", email)
+    except Exception as exc:
+        logger.warning("monitored_emails: confirmation email failed for %s: %s", email, exc)
 
     return row
 
