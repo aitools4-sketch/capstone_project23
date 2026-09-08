@@ -54,6 +54,20 @@ export async function apiGet<T>(path: string): Promise<T> {
   return (await request(path)).json() as Promise<T>
 }
 
+/** Fire-and-forget ping at /health, called once on app load (see App.tsx).
+ * Render's free tier spins the backend down after ~15 minutes idle and
+ * takes 30-50s to wake it back up on the next real request — that request
+ * used to always be the scan itself. Pinging the moment someone lands on
+ * the site instead means the wake-up happens in parallel with them reading
+ * the page and typing their email, so by the time they actually submit a
+ * scan the backend is far more likely to already be warm. Errors here are
+ * expected and irrelevant (a cold instance can itself time out this exact
+ * ping) — this is purely a best-effort head start, never something a
+ * caller waits on or reacts to. */
+export function warmBackend(): void {
+  fetch(`${API_BASE_URL}/health`).catch(() => {})
+}
+
 export async function apiPost<T>(path: string, body: unknown): Promise<T> {
   return (await request(path, { method: 'POST', body })).json() as Promise<T>
 }

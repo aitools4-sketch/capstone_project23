@@ -1,9 +1,10 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import AmbientBackground from './components/AmbientBackground'
 import RequireAuth from './components/app/RequireAuth'
 import DashboardShell from './components/dashboard/DashboardShell'
 import { AuthProvider } from './lib/authProvider'
+import { warmBackend } from './lib/apiClient'
 import HomePage from './pages/HomePage'
 
 const AccountPage = lazy(() => import('./pages/dashboard/AccountPage'))
@@ -36,6 +37,14 @@ function RouteFallback() {
 }
 
 function App() {
+  // Once per full page load (not per route change — App itself never
+  // remounts across client-side navigation), fired as early as possible
+  // regardless of which page someone lands on. See warmBackend()'s own
+  // comment for why this matters on Render's free tier.
+  useEffect(() => {
+    warmBackend()
+  }, [])
+
   return (
     <AuthProvider>
       <BrowserRouter>
