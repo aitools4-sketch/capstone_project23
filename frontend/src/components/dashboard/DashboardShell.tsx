@@ -94,9 +94,6 @@ function DashboardShell() {
         >
           <Avatar email={email ?? 'A'} />
           <span className="hidden max-w-32 truncate text-ink sm:block md:max-w-40">{email}</span>
-          <span className="hidden rounded-full border border-white/10 px-2 py-0.5 text-xs text-ink-faint sm:inline-block">
-            Free
-          </span>
           <ChevronDownIcon className="hidden h-3.5 w-3.5 text-ink-faint sm:block" />
         </NavLink>
 
