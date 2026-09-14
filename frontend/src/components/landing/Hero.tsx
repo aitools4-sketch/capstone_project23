@@ -66,6 +66,18 @@ function Hero() {
             Know more →
           </a>
         </div>
+
+        <div className="mt-6 flex items-center justify-center gap-6 text-sm text-ink-faint">
+          <Link to="/terms" className={`${underlineLink} hover:text-ink-muted`}>
+            Terms of Use
+          </Link>
+          <Link to="/faq" className={`${underlineLink} hover:text-ink-muted`}>
+            FAQs
+          </Link>
+          <Link to="/privacy" className={`${underlineLink} hover:text-ink-muted`}>
+            Privacy Policy
+          </Link>
+        </div>
       </div>
     </section>
   )
