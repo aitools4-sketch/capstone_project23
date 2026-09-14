@@ -51,7 +51,7 @@ function ConsentBanner() {
       role="dialog"
       aria-label="Cookie and data consent"
     >
-      <div className="w-full max-w-2xl rounded-3xl border border-white/10 bg-canvas p-8 shadow-2xl sm:p-10">
+      <div className="w-full max-w-md rounded-3xl border border-white/10 bg-canvas p-8 shadow-2xl sm:p-10">
         <p className="text-base text-ink-muted">
           We collect your email, scan results, and account/session data as described in our{' '}
           <Link to="/privacy" className={`text-ink ${underlineLink}`}>
@@ -83,14 +83,16 @@ function ConsentBanner() {
           </label>
         </div>
 
-        <button
-          type="button"
-          onClick={handleContinue}
-          disabled={!canContinue}
-          className={`mt-8 w-full rounded-full bg-ink px-6 py-3.5 text-base font-medium text-canvas disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto ${liftPrimary}`}
-        >
-          Continue
-        </button>
+        <div className="mt-8 flex justify-center">
+          <button
+            type="button"
+            onClick={handleContinue}
+            disabled={!canContinue}
+            className={`w-full rounded-full bg-ink px-6 py-3.5 text-base font-medium text-canvas disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto ${liftPrimary}`}
+          >
+            Continue
+          </button>
+        </div>
       </div>
     </div>
   )
