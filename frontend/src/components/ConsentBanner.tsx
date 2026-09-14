@@ -27,14 +27,9 @@ function saveConsent(): void {
   }
 }
 
-/** A first-visit consent notice — a small corner card, not a full-screen
- * backdrop, so the page underneath stays visible rather than being hidden
- * or dimmed. Anchored below the sticky header rather than to the bottom:
- * the hero's "Scan your email" CTA sits far enough down the page that a
- * top-anchored card clears it (measured, not assumed) on both mobile and
- * desktop viewports, where a bottom-anchored one — even narrowed to a
- * corner — still overlapped it. Shown once; the choice is remembered in
- * localStorage. */
+/** A first-visit consent notice — centered over a dimmed backdrop so it
+ * reads as the page's primary focus before anything else. Shown once;
+ * the choice is remembered in localStorage. */
 function ConsentBanner() {
   const [dismissed, setDismissed] = useState(hasAlreadyConsented())
   const [privacyChecked, setPrivacyChecked] = useState(false)
@@ -52,12 +47,12 @@ function ConsentBanner() {
 
   return (
     <div
-      className="fixed inset-x-4 top-20 z-[100] sm:inset-x-auto sm:right-4 sm:w-80"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4"
       role="dialog"
       aria-label="Cookie and data consent"
     >
-      <div className="rounded-2xl border border-white/10 bg-canvas/95 p-4 shadow-2xl backdrop-blur">
-        <p className="text-xs text-ink-muted">
+      <div className="w-full max-w-2xl rounded-3xl border border-white/10 bg-canvas p-8 shadow-2xl sm:p-10">
+        <p className="text-base text-ink-muted">
           We collect your email, scan results, and account/session data as described in our{' '}
           <Link to="/privacy" className={`text-ink ${underlineLink}`}>
             Privacy Policy
@@ -65,23 +60,23 @@ function ConsentBanner() {
           .
         </p>
 
-        <div className="mt-3 flex flex-col gap-2">
-          <label className="flex items-start gap-2 text-xs text-ink-muted">
+        <div className="mt-6 flex flex-col gap-4">
+          <label className="flex items-start gap-3 text-base text-ink-muted">
             <input
               type="checkbox"
               checked={privacyChecked}
               onChange={(e) => setPrivacyChecked(e.target.checked)}
-              className="mt-0.5 h-3.5 w-3.5 shrink-0 accent-accent"
+              className="mt-1 h-5 w-5 shrink-0 accent-accent"
             />
             I agree to the Privacy Policy and understand how my data is collected and used.
           </label>
 
-          <label className="flex items-start gap-2 text-xs text-ink-muted">
+          <label className="flex items-start gap-3 text-base text-ink-muted">
             <input
               type="checkbox"
               checked={scanningChecked}
               onChange={(e) => setScanningChecked(e.target.checked)}
-              className="mt-0.5 h-3.5 w-3.5 shrink-0 accent-accent"
+              className="mt-1 h-5 w-5 shrink-0 accent-accent"
             />
             I agree to have my email checked against third-party breach databases (HIBP, DeHashed) to generate my
             risk score.
@@ -92,7 +87,7 @@ function ConsentBanner() {
           type="button"
           onClick={handleContinue}
           disabled={!canContinue}
-          className={`mt-3 w-full rounded-full bg-ink px-4 py-2 text-xs font-medium text-canvas disabled:cursor-not-allowed disabled:opacity-40 ${liftPrimary}`}
+          className={`mt-8 w-full rounded-full bg-ink px-6 py-3.5 text-base font-medium text-canvas disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto ${liftPrimary}`}
         >
           Continue
         </button>
