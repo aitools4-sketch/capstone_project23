@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import AmbientBackground from './components/AmbientBackground'
+import ConsentBanner from './components/ConsentBanner'
 import RequireAuth from './components/app/RequireAuth'
 import DashboardShell from './components/dashboard/DashboardShell'
 import { AuthProvider } from './lib/authProvider'
@@ -47,6 +48,7 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <AmbientBackground />
+        <ConsentBanner />
         <Suspense fallback={<RouteFallback />}>
           <Routes>
             <Route path="/" element={<HomePage />} />
