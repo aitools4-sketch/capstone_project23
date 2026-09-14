@@ -30,6 +30,11 @@ function AccountPage() {
     }
   }
 
+  async function handleSignOut() {
+    await signOut()
+    navigate('/')
+  }
+
   async function handleDelete() {
     setDeleting(true)
     setDeleteError(false)
@@ -74,6 +79,18 @@ function AccountPage() {
         >
           <DownloadIcon className="h-3.5 w-3.5" />
           {exporting ? 'Preparing…' : 'Download my data'}
+        </button>
+      </div>
+
+      <div className={`rounded-2xl border border-white/8 bg-white/3 p-6 ${cardHover}`}>
+        <h2 className="text-sm font-medium text-ink">Sign out</h2>
+        <p className="mt-1 text-sm text-ink-muted">Sign out of your account on this device.</p>
+        <button
+          type="button"
+          onClick={handleSignOut}
+          className={`mt-4 rounded-full border border-white/10 px-4 py-2 text-xs font-medium text-ink ${liftGhost}`}
+        >
+          Sign out
         </button>
       </div>
 
