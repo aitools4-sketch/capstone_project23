@@ -4,15 +4,25 @@ import { LockIcon } from './icons'
 import { cardHover, liftPrimary, underlineLink } from './interactive'
 import { useAuth } from '../lib/useAuth'
 
+const CONSENT_KEY = 'breached:consentGiven'
+
+function hasGivenConsent(): boolean {
+  try {
+    return localStorage.getItem(CONSENT_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
 /** A consent notice — centered over a dimmed backdrop so it reads as the
- * page's primary focus before anything else. Shows on every page load for a
- * signed-out visitor — no persistence, so agreeing once doesn't skip it next
- * time. Signed-in users are skipped entirely: they've already been through
- * this at least once, and re-showing it on every dashboard refresh would
- * interrupt an established session for no reason. */
+ * page's primary focus before anything else. Shows once, the first time
+ * someone reaches the site — persisted via localStorage, so agreeing once
+ * skips it on every later page and visit from this browser. Signed-in users
+ * are also skipped outright, covering the case where localStorage is
+ * unavailable/cleared but the person has already been through this. */
 function ConsentBanner() {
   const { isAuthenticated, loading } = useAuth()
-  const [dismissed, setDismissed] = useState(false)
+  const [dismissed, setDismissed] = useState(() => hasGivenConsent())
   const [privacyChecked, setPrivacyChecked] = useState(false)
   const [scanningChecked, setScanningChecked] = useState(false)
 
@@ -24,6 +34,12 @@ function ConsentBanner() {
 
   function handleContinue() {
     if (!canContinue) return
+    try {
+      localStorage.setItem(CONSENT_KEY, '1')
+    } catch {
+      // Storage unavailable — it just won't persist across visits/tabs,
+      // not worth blocking the dismissal on.
+    }
     setDismissed(true)
   }
 
