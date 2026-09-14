@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import Avatar from '../app/Avatar'
 import { BRAND_NAME } from '../brand'
+import FeedbackWidget from './FeedbackWidget'
 import {
   BellIcon,
   ChevronDownIcon,
@@ -195,6 +196,8 @@ function DashboardShell() {
           <Outlet />
         </main>
       </div>
+
+      <FeedbackWidget />
     </div>
   )
 }
