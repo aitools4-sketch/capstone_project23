@@ -2,17 +2,23 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { LockIcon } from './icons'
 import { cardHover, liftPrimary, underlineLink } from './interactive'
+import { useAuth } from '../lib/useAuth'
 
 /** A consent notice — centered over a dimmed backdrop so it reads as the
- * page's primary focus before anything else. Shows on every page load,
- * every visit — no persistence, so agreeing once doesn't skip it next
- * time. */
+ * page's primary focus before anything else. Shows on every page load for a
+ * signed-out visitor — no persistence, so agreeing once doesn't skip it next
+ * time. Signed-in users are skipped entirely: they've already been through
+ * this at least once, and re-showing it on every dashboard refresh would
+ * interrupt an established session for no reason. */
 function ConsentBanner() {
+  const { isAuthenticated, loading } = useAuth()
   const [dismissed, setDismissed] = useState(false)
   const [privacyChecked, setPrivacyChecked] = useState(false)
   const [scanningChecked, setScanningChecked] = useState(false)
 
-  if (dismissed) return null
+  // While loading, we don't yet know if there's a session — wait rather
+  // than flash the banner for a signed-in user before it disappears.
+  if (loading || isAuthenticated || dismissed) return null
 
   const canContinue = privacyChecked && scanningChecked
 
