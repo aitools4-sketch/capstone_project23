@@ -8,6 +8,7 @@ import { downloadPdfReport } from '../lib/downloadReport'
 import { padCount } from '../lib/format'
 import { MOCK_PREVENTIVE_TIPS, MOCK_RECOMMENDATIONS, simulateScan, type Recommendation } from '../lib/mockData'
 import { runScan, type ScanResult } from '../lib/scanApi'
+import { markScanCompleted } from '../lib/scanSession'
 
 const SAMPLE_ID = 'sample'
 // This list is always blurred and locked behind a sign-in overlay — it's
@@ -197,6 +198,7 @@ function ResultsPage() {
       .then((live) => {
         setResult(live)
         setSampleNotice(null)
+        markScanCompleted()
       })
       .catch((err: unknown) => {
         if (err instanceof ApiError && err.status === 503) {
@@ -205,6 +207,7 @@ function ResultsPage() {
           // failure.
           setResult(sampleResult(targetEmail))
           setSampleNotice("Live scanning isn't configured in this environment yet. Showing a sample result.")
+          markScanCompleted()
         } else {
           // Any other failure (network error, 5xx, timeout) is a real
           // failure and must not be dressed up as a result — showing

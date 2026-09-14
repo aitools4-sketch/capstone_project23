@@ -1,8 +1,10 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useLocation, useSearchParams } from 'react-router-dom'
 import MinimalNav from '../components/app/MinimalNav'
+import ScanGateModal from '../components/ScanGateModal'
 import { CheckIcon, MailIcon } from '../components/icons'
 import { liftPrimary, underlineLink } from '../components/interactive'
+import { hasScannedThisSession } from '../lib/scanSession'
 import { useAuth } from '../lib/useAuth'
 
 const RESEND_COOLDOWN_SECONDS = 30
@@ -18,6 +20,9 @@ function AuthPage() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [cooldown, setCooldown] = useState(0)
+  // Read once on mount: whether to gate is decided by session history up to
+  // this point, not something that should flip mid-visit to this page.
+  const [scanGated] = useState(() => !hasScannedThisSession())
 
   useEffect(() => {
     if (cooldown <= 0) return
@@ -41,7 +46,11 @@ function AuthPage() {
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    if (!email || submitting) return
+    // The gate modal only blocks pointer events (it's a visual overlay, not
+    // a disabled state on the form underneath) — the email input still
+    // holds keyboard focus from its own autoFocus, so without this guard a
+    // gated visitor could type and press Enter to submit anyway.
+    if (scanGated || !email || submitting) return
     void sendLink(email)
   }
 
@@ -127,6 +136,8 @@ function AuthPage() {
           )}
         </div>
       </main>
+
+      {scanGated && <ScanGateModal />}
     </div>
   )
 }
