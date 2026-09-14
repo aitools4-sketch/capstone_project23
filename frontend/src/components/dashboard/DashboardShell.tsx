@@ -56,10 +56,14 @@ function DashboardShell() {
     [...NAV_ITEMS].reverse().find((item) => location.pathname.startsWith(item.to))?.label ?? 'Overview'
 
   async function handleSignOut() {
-    // Invalidates the session on Supabase's servers first; local state only
-    // clears once that's confirmed, via the auth listener in authProvider.
-    await signOut()
+    // Navigate off the RequireAuth-protected route BEFORE the session
+    // actually clears — otherwise the auth listener's state update lands
+    // while RequireAuth is still mounted here, and it redirects to
+    // /auth?redirect=... (this route, now unauthenticated) instead of
+    // honoring this navigate to '/'. Signing out is still awaited, just
+    // after we're already somewhere RequireAuth doesn't apply.
     navigate('/')
+    await signOut()
   }
 
   async function handleDownload() {

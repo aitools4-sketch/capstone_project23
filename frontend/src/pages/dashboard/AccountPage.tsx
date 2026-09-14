@@ -31,8 +31,10 @@ function AccountPage() {
   }
 
   async function handleSignOut() {
-    await signOut()
+    // Navigate off this RequireAuth-protected route before the session
+    // actually clears — see DashboardShell's handleSignOut for why.
     navigate('/')
+    await signOut()
   }
 
   async function handleDelete() {
