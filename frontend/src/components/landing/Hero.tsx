@@ -67,7 +67,7 @@ function Hero() {
           </a>
         </div>
 
-        <div className="mt-6 flex items-center justify-center gap-6 text-sm text-ink-faint">
+        <div className="mt-6 flex items-center justify-center gap-6 text-sm text-ink-muted">
           <Link to="/terms" className={`${underlineLink} hover:text-ink-muted`}>
             Terms of Use
           </Link>
