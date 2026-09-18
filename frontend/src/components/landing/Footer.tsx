@@ -71,13 +71,13 @@ function Footer() {
               <ShieldIcon className="h-5 w-5 text-accent" />
               <span className="text-base font-semibold tracking-tight">{BRAND_NAME}</span>
             </a>
-            <p className="mt-4 max-w-xs text-sm text-ink-faint">Know before they do.</p>
+            <p className="mt-4 max-w-xs text-sm text-ink-muted">Know before they do.</p>
           </div>
 
           {COLUMNS.map((col) => (
             <div key={col.heading}>
-              <h4 className="text-sm font-medium text-ink">{col.heading}</h4>
-              <ul className="mt-4 flex flex-col gap-3 text-sm text-ink-faint">
+              <h3 className="text-sm font-medium text-ink">{col.heading}</h3>
+              <ul className="mt-4 flex flex-col gap-3 text-sm text-ink-muted">
                 {col.links.map((link) => (
                   <li key={link.label}>
                     <FooterLinkItem link={link} />
@@ -88,7 +88,7 @@ function Footer() {
           ))}
         </div>
 
-        <div className="mt-10 flex flex-col items-center justify-between gap-2 border-t border-white/6 pt-8 text-xs text-ink-faint sm:mt-16 sm:flex-row">
+        <div className="mt-10 flex flex-col items-center justify-between gap-2 border-t border-white/6 pt-8 text-xs text-ink-muted sm:mt-16 sm:flex-row">
           <p>
             &copy; {new Date().getFullYear()} {BRAND_NAME}. All rights reserved.
           </p>
