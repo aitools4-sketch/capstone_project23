@@ -1,0 +1,15 @@
+# Breached
+
+> AI-powered digital identity leak scanner. Check whether an email address has been exposed in a data breach, and get an AI-generated risk score with clear steps to reduce exposure.
+
+Breached queries DeHashed and Have I Been Pwned to check an email address against known data breaches, then produces an AI-scored risk assessment explaining what was found and what to do about it. Scanning is free and does not require an account; signing in unlocks full results, ongoing breach monitoring, and a dashboard.
+
+## Pages
+
+- [Home](https://www.breachdata.online/): Overview and entry point for scanning an email.
+- [Scan](https://www.breachdata.online/scan): Start a breach scan for an email address.
+- [Security Basics](https://www.breachdata.online/modules): Educational modules on account security.
+- [Breach Intelligence](https://www.breachdata.online/breach-intelligence): Directory of documented data breaches.
+- [FAQ](https://www.breachdata.online/faq): Frequently asked questions.
+- [Terms of Use](https://www.breachdata.online/terms): Terms governing use of the service.
+- [Privacy Policy](https://www.breachdata.online/privacy): What data is collected and how it is used.
