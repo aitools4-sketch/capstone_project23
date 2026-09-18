@@ -5,6 +5,8 @@ import { cardHover, liftPrimary, underlineLink } from './interactive'
 import { useAuth } from '../lib/useAuth'
 
 const CONSENT_KEY = 'breached:consentGiven'
+const CONSENT_COOKIE = 'breached_consent'
+const CONSENT_COOKIE_MAX_AGE = 60 * 60 * 24 * 365 // 1 year, in seconds
 
 function hasGivenConsent(): boolean {
   try {
@@ -12,6 +14,17 @@ function hasGivenConsent(): boolean {
   } catch {
     return false
   }
+}
+
+// A visible, standard browser cookie alongside the localStorage flag above —
+// localStorage alone decides whether to show the banner (unchanged), this is
+// purely so the site actually has a real cookie a user (or a scanner) can
+// find in DevTools' Application > Cookies panel. Secure is conditional: the
+// browser silently refuses to set a Secure cookie over plain http://, which
+// would otherwise make this untestable on localhost dev.
+function setConsentCookie() {
+  const secure = window.location.protocol === 'https:' ? '; Secure' : ''
+  document.cookie = `${CONSENT_COOKIE}=1; path=/; max-age=${CONSENT_COOKIE_MAX_AGE}; SameSite=Lax${secure}`
 }
 
 /** A consent notice — centered over a dimmed backdrop so it reads as the
@@ -40,6 +53,7 @@ function ConsentBanner() {
       // Storage unavailable — it just won't persist across visits/tabs,
       // not worth blocking the dismissal on.
     }
+    setConsentCookie()
     setDismissed(true)
   }
 
