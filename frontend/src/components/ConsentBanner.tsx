@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { LockIcon } from './icons'
 import { cardHover, liftPrimary, underlineLink } from './interactive'
 import { useAuth } from '../lib/useAuth'
-import { TERMS_ACKNOWLEDGMENT, TERMS_IMPORTANT_NOTICE, TERMS_SECTIONS } from '../lib/termsContent'
+import { TERMS_ACKNOWLEDGMENT, TERMS_IMPORTANT_NOTICE, TERMS_LAST_UPDATED, TERMS_SECTIONS } from '../lib/termsContent'
 
 const CONSENT_KEY = 'breached:consentGiven'
 const CONSENT_COOKIE = 'breached_consent'
@@ -101,7 +101,11 @@ function ConsentBanner() {
       role="dialog"
       aria-label="Cookie and data consent"
     >
-      <div className="w-full max-w-md rounded-3xl border border-white/10 bg-canvas p-8 text-center shadow-2xl sm:p-10">
+      <div
+        className={`w-full rounded-3xl border border-white/10 bg-canvas p-8 text-center shadow-2xl transition-[max-width] duration-300 sm:p-10 ${
+          showTerms ? 'max-h-[90vh] max-w-2xl overflow-y-auto' : 'max-w-md'
+        }`}
+      >
         <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/4">
           <LockIcon className="h-5 w-5 text-accent" />
         </div>
@@ -130,17 +134,27 @@ function ConsentBanner() {
           <div
             ref={scrollRef}
             onScroll={handleTermsScroll}
-            className="mt-4 max-h-64 overflow-y-auto rounded-xl border border-white/10 bg-white/3 p-4 text-left text-xs leading-relaxed text-ink-muted [&_a]:text-ink [&_a]:underline [&_li]:ml-4 [&_li]:list-disc [&_p+p]:mt-2 [&_strong]:text-ink [&_ul]:flex [&_ul]:flex-col [&_ul]:gap-1.5"
+            className="mt-4 max-h-[55vh] overflow-y-auto rounded-2xl border border-white/10 bg-white/3 p-6 text-left text-sm leading-relaxed text-ink-muted sm:p-8 [&_a]:text-ink [&_a]:underline [&_li]:ml-4 [&_li]:list-disc [&_p+p]:mt-2.5 [&_strong]:text-ink [&_ul]:flex [&_ul]:flex-col [&_ul]:gap-2"
           >
-            <p>{TERMS_IMPORTANT_NOTICE}</p>
+            <div className="text-center">
+              <p className="text-xs font-medium uppercase tracking-[0.2em] text-ink-faint">Legal Agreement</p>
+              <p className="mt-2 text-lg font-semibold tracking-tight text-ink">
+                End User License Agreement &amp; Terms of Service
+              </p>
+              <p className="mt-1 text-xs text-ink-faint">Last updated {TERMS_LAST_UPDATED}</p>
+            </div>
+
+            <p className="mt-6 border-t border-white/8 pt-6">{TERMS_IMPORTANT_NOTICE}</p>
+
             {TERMS_SECTIONS.map((section) => (
-              <div key={section.title} className="mt-4">
-                <p className="text-sm font-semibold text-ink">{section.title}</p>
-                <div className="mt-1.5 flex flex-col gap-2">{section.body}</div>
+              <div key={section.title} className="mt-6 border-t border-white/8 pt-6">
+                <p className="text-base font-semibold text-ink">{section.title}</p>
+                <div className="mt-2 flex flex-col gap-2.5">{section.body}</div>
               </div>
             ))}
-            <p className="mt-4 border-t border-white/10 pt-3">{TERMS_ACKNOWLEDGMENT}</p>
-            <p className="mt-3 text-center text-[11px] uppercase tracking-widest text-ink-faint">— End of document —</p>
+
+            <p className="mt-6 border-t border-white/8 pt-6">{TERMS_ACKNOWLEDGMENT}</p>
+            <p className="mt-4 text-center text-[11px] uppercase tracking-widest text-ink-faint">— End of document —</p>
           </div>
         )}
 
