@@ -1,9 +1,9 @@
 import { useRef, useState, type UIEvent } from 'react'
-import { Link } from 'react-router-dom'
 import { LockIcon } from './icons'
-import { cardHover, liftPrimary, underlineLink } from './interactive'
+import { cardHover, liftPrimary } from './interactive'
 import { useAuth } from '../lib/useAuth'
 import { TERMS_ACKNOWLEDGMENT, TERMS_IMPORTANT_NOTICE, TERMS_LAST_UPDATED, TERMS_SECTIONS } from '../lib/termsContent'
+import { PRIVACY_INTRO, PRIVACY_LAST_UPDATED, PRIVACY_SECTIONS } from '../lib/privacyContent'
 
 const CONSENT_KEY = 'breached:consentGiven'
 const CONSENT_COOKIE = 'breached_consent'
@@ -36,6 +36,25 @@ function isScrolledToBottom(el: HTMLElement): boolean {
   return el.scrollTop + el.clientHeight >= el.scrollHeight - SCROLL_BOTTOM_THRESHOLD
 }
 
+const DOC_PANEL_CLASS =
+  'mt-4 max-h-[55vh] overflow-y-auto rounded-2xl border border-white/10 bg-white/3 p-6 text-left text-sm leading-relaxed text-ink-muted sm:p-8 [&_a]:text-ink [&_a]:underline [&_li]:ml-4 [&_li]:list-disc [&_p+p]:mt-2.5 [&_strong]:text-ink [&_ul]:flex [&_ul]:flex-col [&_ul]:gap-2'
+
+function DocToggleButton({ read, shown, label, onClick }: { read: boolean; shown: boolean; label: string; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`inline-flex items-center justify-center gap-1.5 rounded-full border px-4 py-2 text-xs font-semibold transition-colors duration-150 ${
+        read
+          ? 'border-white/15 bg-white/5 text-ink-muted'
+          : 'border-accent bg-accent/15 text-accent hover:bg-accent/25'
+      }`}
+    >
+      {shown ? `Hide ${label}` : read ? `✓ ${label} read — view again` : `Read our ${label} →`}
+    </button>
+  )
+}
+
 /** A consent notice — centered over a dimmed backdrop so it reads as the
  * page's primary focus before anything else. Shows once, the first time
  * someone reaches the site — persisted via localStorage, so agreeing once
@@ -43,36 +62,56 @@ function isScrolledToBottom(el: HTMLElement): boolean {
  * are also skipped outright, covering the case where localStorage is
  * unavailable/cleared but the person has already been through this.
  *
- * The checkboxes stay locked until the full Terms of Use (the same content
- * as TermsPage.tsx, via the shared termsContent module) has been scrolled
- * to its end inside this popup — clicking through to the standalone page
- * isn't enough on its own. */
+ * Each checkbox is gated behind actually scrolling the matching document
+ * (Terms of Use, Privacy Policy — both the same shared content the
+ * standalone pages render) to its end inside this popup, not just opening
+ * it. */
 function ConsentBanner() {
   const { isAuthenticated, loading } = useAuth()
   const [dismissed, setDismissed] = useState(() => hasGivenConsent())
+
   const [showTerms, setShowTerms] = useState(false)
   const [termsRead, setTermsRead] = useState(false)
+  const termsScrollRef = useRef<HTMLDivElement>(null)
+
+  const [showPrivacy, setShowPrivacy] = useState(false)
+  const [privacyRead, setPrivacyRead] = useState(false)
+  const privacyScrollRef = useRef<HTMLDivElement>(null)
+
   const [privacyChecked, setPrivacyChecked] = useState(false)
   const [scanningChecked, setScanningChecked] = useState(false)
-  const scrollRef = useRef<HTMLDivElement>(null)
 
   // While loading, we don't yet know if there's a session — wait rather
   // than flash the banner for a signed-in user before it disappears.
   if (loading || isAuthenticated || dismissed) return null
 
-  const canContinue = termsRead && privacyChecked && scanningChecked
+  const canContinue = termsRead && privacyRead && privacyChecked && scanningChecked
 
+  // If a panel's short enough to show everything at once (a very tall
+  // viewport), there's nothing to scroll past — don't leave someone stuck
+  // on a scroll gesture that can't happen. Checked after the panel actually
+  // paints, in an event handler (not during render, where refs aren't safe
+  // to read).
   function handleToggleTerms() {
     setShowTerms((wasShown) => {
       const nowShown = !wasShown
       if (nowShown) {
-        // If the panel's short enough to show everything at once (a very
-        // tall viewport, or if content ever gets shorter), there's nothing
-        // to scroll past — don't leave someone stuck on a scroll gesture
-        // that can't happen. Checked after the panel actually paints.
         requestAnimationFrame(() => {
-          const el = scrollRef.current
+          const el = termsScrollRef.current
           if (el && isScrolledToBottom(el)) setTermsRead(true)
+        })
+      }
+      return nowShown
+    })
+  }
+
+  function handleTogglePrivacy() {
+    setShowPrivacy((wasShown) => {
+      const nowShown = !wasShown
+      if (nowShown) {
+        requestAnimationFrame(() => {
+          const el = privacyScrollRef.current
+          if (el && isScrolledToBottom(el)) setPrivacyRead(true)
         })
       }
       return nowShown
@@ -81,6 +120,10 @@ function ConsentBanner() {
 
   function handleTermsScroll(e: UIEvent<HTMLDivElement>) {
     if (isScrolledToBottom(e.currentTarget)) setTermsRead(true)
+  }
+
+  function handlePrivacyScroll(e: UIEvent<HTMLDivElement>) {
+    if (isScrolledToBottom(e.currentTarget)) setPrivacyRead(true)
   }
 
   function handleContinue() {
@@ -103,7 +146,7 @@ function ConsentBanner() {
     >
       <div
         className={`w-full rounded-3xl border border-white/10 bg-canvas p-8 text-center shadow-2xl transition-[max-width] duration-300 sm:p-10 ${
-          showTerms ? 'max-h-[90vh] max-w-2xl overflow-y-auto' : 'max-w-md'
+          showTerms || showPrivacy ? 'max-h-[90vh] max-w-2xl overflow-y-auto' : 'max-w-md'
         }`}
       >
         <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/4">
@@ -111,31 +154,16 @@ function ConsentBanner() {
         </div>
         <h1 className="mt-5 text-2xl font-semibold tracking-tight text-ink">Before you continue</h1>
         <p className="mt-3 text-sm text-ink-muted">
-          We collect your email, scan results, and account/session data as described in our{' '}
-          <Link to="/privacy" className={`text-ink ${underlineLink}`}>
-            Privacy Policy
-          </Link>
-          .
+          We collect your email, scan results, and account/session data as described in our Privacy Policy.
         </p>
 
-        <button
-          type="button"
-          onClick={handleToggleTerms}
-          className={`mt-4 inline-flex items-center justify-center gap-1.5 rounded-full border px-4 py-2 text-xs font-medium transition-colors duration-150 ${
-            termsRead
-              ? 'border-accent/30 bg-accent/10 text-accent'
-              : 'border-white/15 text-ink hover:border-white/30'
-          }`}
-        >
-          {termsRead ? '✓ Terms of Use read' : showTerms ? 'Hide Terms of Use' : 'Read our Terms and Conditions →'}
-        </button>
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+          <DocToggleButton read={termsRead} shown={showTerms} label="Terms and Conditions" onClick={handleToggleTerms} />
+          <DocToggleButton read={privacyRead} shown={showPrivacy} label="Privacy Policy" onClick={handleTogglePrivacy} />
+        </div>
 
         {showTerms && (
-          <div
-            ref={scrollRef}
-            onScroll={handleTermsScroll}
-            className="mt-4 max-h-[55vh] overflow-y-auto rounded-2xl border border-white/10 bg-white/3 p-6 text-left text-sm leading-relaxed text-ink-muted sm:p-8 [&_a]:text-ink [&_a]:underline [&_li]:ml-4 [&_li]:list-disc [&_p+p]:mt-2.5 [&_strong]:text-ink [&_ul]:flex [&_ul]:flex-col [&_ul]:gap-2"
-          >
+          <div ref={termsScrollRef} onScroll={handleTermsScroll} className={DOC_PANEL_CLASS}>
             <div className="text-center">
               <p className="text-xs font-medium uppercase tracking-[0.2em] text-ink-faint">Legal Agreement</p>
               <p className="mt-2 text-lg font-semibold tracking-tight text-ink">
@@ -157,38 +185,58 @@ function ConsentBanner() {
           </div>
         )}
 
-        {showTerms && !termsRead && (
-          <p className="mt-2 text-xs text-ink-faint">Scroll to the bottom to unlock the checkboxes below.</p>
-        )}
-        {!showTerms && !termsRead && (
-          <p className="mt-2 text-xs text-ink-faint">Read the Terms and Conditions in full to unlock the checkboxes below.</p>
+        {showPrivacy && (
+          <div ref={privacyScrollRef} onScroll={handlePrivacyScroll} className={DOC_PANEL_CLASS}>
+            <div className="text-center">
+              <p className="text-xs font-medium uppercase tracking-[0.2em] text-ink-faint">Legal Agreement</p>
+              <p className="mt-2 text-lg font-semibold tracking-tight text-ink">Privacy Policy</p>
+              <p className="mt-1 text-xs text-ink-faint">Last updated {PRIVACY_LAST_UPDATED}</p>
+            </div>
+
+            <p className="mt-6 border-t border-white/8 pt-6">{PRIVACY_INTRO}</p>
+
+            {PRIVACY_SECTIONS.map((section) => (
+              <div key={section.title} className="mt-6 border-t border-white/8 pt-6">
+                <p className="text-base font-semibold text-ink">{section.title}</p>
+                <div className="mt-2 flex flex-col gap-2.5">{section.body}</div>
+              </div>
+            ))}
+          </div>
         )}
 
-        <fieldset disabled={!termsRead} className="mt-4 flex flex-col gap-3 text-left disabled:opacity-40">
+        {(!termsRead || !privacyRead) && (
+          <p className="mt-2 text-xs text-ink-faint">
+            Read both documents in full (scroll each to the end) to unlock the checkboxes below.
+          </p>
+        )}
+
+        <fieldset className="mt-4 flex flex-col gap-3 text-left">
           <label
             className={`flex items-start gap-3 rounded-xl border border-white/8 bg-white/3 p-4 text-sm text-ink-muted ${
-              termsRead ? cardHover : ''
+              privacyRead ? cardHover : 'opacity-40'
             }`}
           >
             <input
               type="checkbox"
+              disabled={!privacyRead}
               checked={privacyChecked}
               onChange={(e) => setPrivacyChecked(e.target.checked)}
-              className="mt-0.5 h-4 w-4 shrink-0 accent-accent"
+              className="mt-0.5 h-4 w-4 shrink-0 accent-accent disabled:cursor-not-allowed"
             />
             I agree to the Privacy Policy and understand how my data is collected and used.
           </label>
 
           <label
             className={`flex items-start gap-3 rounded-xl border border-white/8 bg-white/3 p-4 text-sm text-ink-muted ${
-              termsRead ? cardHover : ''
+              termsRead ? cardHover : 'opacity-40'
             }`}
           >
             <input
               type="checkbox"
+              disabled={!termsRead}
               checked={scanningChecked}
               onChange={(e) => setScanningChecked(e.target.checked)}
-              className="mt-0.5 h-4 w-4 shrink-0 accent-accent"
+              className="mt-0.5 h-4 w-4 shrink-0 accent-accent disabled:cursor-not-allowed"
             />
             I agree to have my email checked against third-party breach databases (HIBP, DeHashed) to generate my
             risk score.
