@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react'
-import { Link } from 'react-router-dom'
 import { BRAND_NAME } from '../components/brand'
 
 // Single source of truth for the EULA/Terms of Service — used by both
@@ -260,9 +259,8 @@ export const TERMS_SECTIONS: TermsSection[] = [
     body: (
       <p>
         Questions about this Agreement? Reach us at{' '}
-        <a href="mailto:claudeaisubscription04@gmail.com">claudeaisubscription04@gmail.com</a>. See our{' '}
-        <Link to="/privacy">Privacy Policy</Link> for the full breakdown of what {BRAND_NAME} itself collects and how
-        it&apos;s used.
+        <a href="mailto:claudeaisubscription04@gmail.com">claudeaisubscription04@gmail.com</a>. See our Privacy
+        Policy for the full breakdown of what {BRAND_NAME} itself collects and how it&apos;s used.
       </p>
     ),
   },

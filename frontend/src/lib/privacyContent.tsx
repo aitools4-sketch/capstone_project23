@@ -185,12 +185,9 @@ export const PRIVACY_SECTIONS: PrivacySection[] = [
     body: (
       <p>
         {BRAND_NAME} requires users to be at least 18 years of age, or to have legal parental consent, as stated in
-        our{' '}
-        <a href="/terms" className="text-ink underline">
-          Terms of Service
-        </a>
-        . We don&apos;t knowingly collect data from anyone who doesn&apos;t meet this requirement. If you believe a
-        minor has used the service and provided personal data, contact us and we&apos;ll remove it.
+        our Terms of Service. We don&apos;t knowingly collect data from anyone who doesn&apos;t meet this
+        requirement. If you believe a minor has used the service and provided personal data, contact us and
+        we&apos;ll remove it.
       </p>
     ),
   },
