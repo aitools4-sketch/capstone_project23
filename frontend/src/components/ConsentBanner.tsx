@@ -36,6 +36,7 @@ function setConsentCookie() {
 function ConsentBanner() {
   const { isAuthenticated, loading } = useAuth()
   const [dismissed, setDismissed] = useState(() => hasGivenConsent())
+  const [termsOpened, setTermsOpened] = useState(false)
   const [privacyChecked, setPrivacyChecked] = useState(false)
   const [scanningChecked, setScanningChecked] = useState(false)
 
@@ -43,7 +44,7 @@ function ConsentBanner() {
   // than flash the banner for a signed-in user before it disappears.
   if (loading || isAuthenticated || dismissed) return null
 
-  const canContinue = privacyChecked && scanningChecked
+  const canContinue = termsOpened && privacyChecked && scanningChecked
 
   function handleContinue() {
     if (!canContinue) return
@@ -76,9 +77,28 @@ function ConsentBanner() {
           .
         </p>
 
-        <div className="mt-6 flex flex-col gap-3 text-left">
+        <Link
+          to="/terms"
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => setTermsOpened(true)}
+          className={`mt-4 inline-flex items-center justify-center gap-1.5 rounded-full border px-4 py-2 text-xs font-medium transition-colors duration-150 ${
+            termsOpened
+              ? 'border-accent/30 bg-accent/10 text-accent'
+              : 'border-white/15 text-ink hover:border-white/30'
+          }`}
+        >
+          {termsOpened ? '✓ Terms of Use opened' : 'Read our Terms of Use first →'}
+        </Link>
+        {!termsOpened && (
+          <p className="mt-2 text-xs text-ink-faint">Open and read the Terms of Use to unlock the checkboxes below.</p>
+        )}
+
+        <fieldset disabled={!termsOpened} className="mt-4 flex flex-col gap-3 text-left disabled:opacity-40">
           <label
-            className={`flex items-start gap-3 rounded-xl border border-white/8 bg-white/3 p-4 text-sm text-ink-muted ${cardHover}`}
+            className={`flex items-start gap-3 rounded-xl border border-white/8 bg-white/3 p-4 text-sm text-ink-muted ${
+              termsOpened ? cardHover : ''
+            }`}
           >
             <input
               type="checkbox"
@@ -90,7 +110,9 @@ function ConsentBanner() {
           </label>
 
           <label
-            className={`flex items-start gap-3 rounded-xl border border-white/8 bg-white/3 p-4 text-sm text-ink-muted ${cardHover}`}
+            className={`flex items-start gap-3 rounded-xl border border-white/8 bg-white/3 p-4 text-sm text-ink-muted ${
+              termsOpened ? cardHover : ''
+            }`}
           >
             <input
               type="checkbox"
@@ -101,7 +123,7 @@ function ConsentBanner() {
             I agree to have my email checked against third-party breach databases (HIBP, DeHashed) to generate my
             risk score.
           </label>
-        </div>
+        </fieldset>
 
         <div className="mt-8 flex justify-center">
           <button
