@@ -154,7 +154,6 @@ function ConsentBanner() {
             ))}
 
             <p className="mt-6 border-t border-white/8 pt-6">{TERMS_ACKNOWLEDGMENT}</p>
-            <p className="mt-4 text-center text-[11px] uppercase tracking-widest text-ink-faint">— End of document —</p>
           </div>
         )}
 
