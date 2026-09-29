@@ -1,12 +1,17 @@
-import { useState } from 'react'
+import { useRef, useState, type UIEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { LockIcon } from './icons'
 import { cardHover, liftPrimary, underlineLink } from './interactive'
 import { useAuth } from '../lib/useAuth'
+import { TERMS_ACKNOWLEDGMENT, TERMS_IMPORTANT_NOTICE, TERMS_SECTIONS } from '../lib/termsContent'
 
 const CONSENT_KEY = 'breached:consentGiven'
 const CONSENT_COOKIE = 'breached_consent'
 const CONSENT_COOKIE_MAX_AGE = 60 * 60 * 24 * 365 // 1 year, in seconds
+
+// How close to the true bottom counts as "reached the bottom" — a couple of
+// px of slack for sub-pixel scroll rounding, which differs by browser/zoom.
+const SCROLL_BOTTOM_THRESHOLD = 4
 
 function hasGivenConsent(): boolean {
   try {
@@ -16,15 +21,19 @@ function hasGivenConsent(): boolean {
   }
 }
 
-// A visible, standard browser cookie alongside the localStorage flag above —
-// localStorage alone decides whether to show the banner (unchanged), this is
-// purely so the site actually has a real cookie a user (or a scanner) can
-// find in DevTools' Application > Cookies panel. Secure is conditional: the
-// browser silently refuses to set a Secure cookie over plain http://, which
-// would otherwise make this untestable on localhost dev.
+// A visible, standard browser cookie alongside the localStorage flag below —
+// localStorage alone decides whether to show the banner, this is purely so
+// the site actually has a real cookie a user (or a scanner) can find in
+// DevTools' Application > Cookies panel. Secure is conditional: the browser
+// silently refuses to set a Secure cookie over plain http://, which would
+// otherwise make this untestable on localhost dev.
 function setConsentCookie() {
   const secure = window.location.protocol === 'https:' ? '; Secure' : ''
   document.cookie = `${CONSENT_COOKIE}=1; path=/; max-age=${CONSENT_COOKIE_MAX_AGE}; SameSite=Lax${secure}`
+}
+
+function isScrolledToBottom(el: HTMLElement): boolean {
+  return el.scrollTop + el.clientHeight >= el.scrollHeight - SCROLL_BOTTOM_THRESHOLD
 }
 
 /** A consent notice — centered over a dimmed backdrop so it reads as the
@@ -32,19 +41,47 @@ function setConsentCookie() {
  * someone reaches the site — persisted via localStorage, so agreeing once
  * skips it on every later page and visit from this browser. Signed-in users
  * are also skipped outright, covering the case where localStorage is
- * unavailable/cleared but the person has already been through this. */
+ * unavailable/cleared but the person has already been through this.
+ *
+ * The checkboxes stay locked until the full Terms of Use (the same content
+ * as TermsPage.tsx, via the shared termsContent module) has been scrolled
+ * to its end inside this popup — clicking through to the standalone page
+ * isn't enough on its own. */
 function ConsentBanner() {
   const { isAuthenticated, loading } = useAuth()
   const [dismissed, setDismissed] = useState(() => hasGivenConsent())
-  const [termsOpened, setTermsOpened] = useState(false)
+  const [showTerms, setShowTerms] = useState(false)
+  const [termsRead, setTermsRead] = useState(false)
   const [privacyChecked, setPrivacyChecked] = useState(false)
   const [scanningChecked, setScanningChecked] = useState(false)
+  const scrollRef = useRef<HTMLDivElement>(null)
 
   // While loading, we don't yet know if there's a session — wait rather
   // than flash the banner for a signed-in user before it disappears.
   if (loading || isAuthenticated || dismissed) return null
 
-  const canContinue = termsOpened && privacyChecked && scanningChecked
+  const canContinue = termsRead && privacyChecked && scanningChecked
+
+  function handleToggleTerms() {
+    setShowTerms((wasShown) => {
+      const nowShown = !wasShown
+      if (nowShown) {
+        // If the panel's short enough to show everything at once (a very
+        // tall viewport, or if content ever gets shorter), there's nothing
+        // to scroll past — don't leave someone stuck on a scroll gesture
+        // that can't happen. Checked after the panel actually paints.
+        requestAnimationFrame(() => {
+          const el = scrollRef.current
+          if (el && isScrolledToBottom(el)) setTermsRead(true)
+        })
+      }
+      return nowShown
+    })
+  }
+
+  function handleTermsScroll(e: UIEvent<HTMLDivElement>) {
+    if (isScrolledToBottom(e.currentTarget)) setTermsRead(true)
+  }
 
   function handleContinue() {
     if (!canContinue) return
@@ -77,27 +114,47 @@ function ConsentBanner() {
           .
         </p>
 
-        <Link
-          to="/terms"
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() => setTermsOpened(true)}
+        <button
+          type="button"
+          onClick={handleToggleTerms}
           className={`mt-4 inline-flex items-center justify-center gap-1.5 rounded-full border px-4 py-2 text-xs font-medium transition-colors duration-150 ${
-            termsOpened
+            termsRead
               ? 'border-accent/30 bg-accent/10 text-accent'
               : 'border-white/15 text-ink hover:border-white/30'
           }`}
         >
-          {termsOpened ? '✓ Terms of Use opened' : 'Read our Terms of Use first →'}
-        </Link>
-        {!termsOpened && (
-          <p className="mt-2 text-xs text-ink-faint">Open and read the Terms of Use to unlock the checkboxes below.</p>
+          {termsRead ? '✓ Terms of Use read' : showTerms ? 'Hide Terms of Use' : 'Read our Terms and Conditions →'}
+        </button>
+
+        {showTerms && (
+          <div
+            ref={scrollRef}
+            onScroll={handleTermsScroll}
+            className="mt-4 max-h-64 overflow-y-auto rounded-xl border border-white/10 bg-white/3 p-4 text-left text-xs leading-relaxed text-ink-muted [&_a]:text-ink [&_a]:underline [&_li]:ml-4 [&_li]:list-disc [&_p+p]:mt-2 [&_strong]:text-ink [&_ul]:flex [&_ul]:flex-col [&_ul]:gap-1.5"
+          >
+            <p>{TERMS_IMPORTANT_NOTICE}</p>
+            {TERMS_SECTIONS.map((section) => (
+              <div key={section.title} className="mt-4">
+                <p className="text-sm font-semibold text-ink">{section.title}</p>
+                <div className="mt-1.5 flex flex-col gap-2">{section.body}</div>
+              </div>
+            ))}
+            <p className="mt-4 border-t border-white/10 pt-3">{TERMS_ACKNOWLEDGMENT}</p>
+            <p className="mt-3 text-center text-[11px] uppercase tracking-widest text-ink-faint">— End of document —</p>
+          </div>
         )}
 
-        <fieldset disabled={!termsOpened} className="mt-4 flex flex-col gap-3 text-left disabled:opacity-40">
+        {showTerms && !termsRead && (
+          <p className="mt-2 text-xs text-ink-faint">Scroll to the bottom to unlock the checkboxes below.</p>
+        )}
+        {!showTerms && !termsRead && (
+          <p className="mt-2 text-xs text-ink-faint">Read the Terms and Conditions in full to unlock the checkboxes below.</p>
+        )}
+
+        <fieldset disabled={!termsRead} className="mt-4 flex flex-col gap-3 text-left disabled:opacity-40">
           <label
             className={`flex items-start gap-3 rounded-xl border border-white/8 bg-white/3 p-4 text-sm text-ink-muted ${
-              termsOpened ? cardHover : ''
+              termsRead ? cardHover : ''
             }`}
           >
             <input
@@ -111,7 +168,7 @@ function ConsentBanner() {
 
           <label
             className={`flex items-start gap-3 rounded-xl border border-white/8 bg-white/3 p-4 text-sm text-ink-muted ${
-              termsOpened ? cardHover : ''
+              termsRead ? cardHover : ''
             }`}
           >
             <input
