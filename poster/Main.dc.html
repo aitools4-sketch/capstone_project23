@@ -1,0 +1,349 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    a, a:hover { color: #f4f4f2; }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.7); opacity: .6; }
+      70% { transform: scale(2.2); opacity: 0; }
+      100% { transform: scale(2.2); opacity: 0; }
+    }
+    .kicker { font-size: 14px; text-transform: uppercase; letter-spacing: .16em; color: #59595f; font-weight: 500; }
+    .section-num { font-size: 13px; font-weight: 700; letter-spacing: .08em; color: #59595f; margin: 0 0 7px; }
+    .section-heading { font-size: 27px; font-weight: 600; letter-spacing: -0.015em; color: #f4f4f2; margin: 0; line-height: 1.2; white-space: nowrap; }
+    .body-text { font-size: 16px; line-height: 1.6; color: #97979e; margin: 0; }
+    .small-caps { font-size: 12.5px; text-transform: uppercase; letter-spacing: .08em; color: #f4f4f2; font-weight: 600; white-space: nowrap; }
+    .glow { height: 1px; background: linear-gradient(to right, transparent, rgba(255,255,255,.14), transparent); }
+    .row { margin-top: 15px; padding-top: 11px; }
+    .card { border-radius: 16px; border: 1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.03); }
+    .hline { padding: 7px 0; border-top: 1px solid rgba(255,255,255,.08); }
+    .hline:last-child { border-bottom: 1px solid rgba(255,255,255,.08); }
+    .arrow { color: rgba(255,255,255,.28); font-size: 20px; flex-shrink: 0; }
+    .icon-badge { width: 32px; height: 32px; border-radius: 999px; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.05); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .icon-badge svg { width: 15px; height: 15px; color: #f4f4f2; }
+    .corner { position: absolute; width: 26px; height: 26px; border-color: rgba(255,255,255,.4); pointer-events: none; }
+  </style>
+</helmet>
+
+<div style="position:relative;width:3456px;height:2592px;background:#000000;color:#f4f4f2;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;overflow:hidden;">
+
+  <!-- faint ambient starfield -->
+  <div style="position:absolute;inset:0;pointer-events:none;">
+    <span style="position:absolute;left:6%;top:10%;width:1px;height:1px;border-radius:999px;background:#fff;opacity:.22;"></span>
+    <span style="position:absolute;left:18%;top:26%;width:1px;height:1px;border-radius:999px;background:#fff;opacity:.16;"></span>
+    <span style="position:absolute;left:32%;top:6%;width:1px;height:1px;border-radius:999px;background:#fff;opacity:.20;"></span>
+    <span style="position:absolute;left:60%;top:15%;width:1px;height:1px;border-radius:999px;background:#fff;opacity:.18;"></span>
+    <span style="position:absolute;left:78%;top:8%;width:1px;height:1px;border-radius:999px;background:#fff;opacity:.24;"></span>
+    <span style="position:absolute;left:92%;top:20%;width:1px;height:1px;border-radius:999px;background:#fff;opacity:.15;"></span>
+    <span style="position:absolute;left:4%;top:45%;width:1px;height:1px;border-radius:999px;background:#fff;opacity:.19;"></span>
+    <span style="position:absolute;left:96%;top:50%;width:1px;height:1px;border-radius:999px;background:#fff;opacity:.21;"></span>
+    <span style="position:absolute;left:8%;top:88%;width:1px;height:1px;border-radius:999px;background:#fff;opacity:.17;"></span>
+    <span style="position:absolute;left:94%;top:90%;width:1px;height:1px;border-radius:999px;background:#fff;opacity:.20;"></span>
+    <span style="position:absolute;left:50%;top:4%;width:1px;height:1px;border-radius:999px;background:#fff;opacity:.16;"></span>
+  </div>
+
+  <!-- quiet ambient glow -->
+  <div style="position:absolute;top:-200px;left:50%;transform:translateX(-50%);width:1600px;height:900px;background:radial-gradient(ellipse, rgba(244,244,242,.09) 0%, rgba(244,244,242,0) 70%);pointer-events:none;"></div>
+
+  <!-- outer poster frame + corner accents -->
+  <div style="position:absolute;inset:56px;border:1px solid rgba(255,255,255,.14);pointer-events:none;"></div>
+  <span class="corner" style="top:38px;left:38px;border-top:2px solid rgba(255,255,255,.4);border-left:2px solid rgba(255,255,255,.4);"></span>
+  <span class="corner" style="top:38px;right:38px;border-top:2px solid rgba(255,255,255,.4);border-right:2px solid rgba(255,255,255,.4);"></span>
+  <span class="corner" style="bottom:38px;left:38px;border-bottom:2px solid rgba(255,255,255,.4);border-left:2px solid rgba(255,255,255,.4);"></span>
+  <span class="corner" style="bottom:38px;right:38px;border-bottom:2px solid rgba(255,255,255,.4);border-right:2px solid rgba(255,255,255,.4);"></span>
+
+  <div style="position:relative;height:100%;display:flex;flex-direction:column;justify-content:space-between;padding:108px;">
+
+    <!-- ============ EVERYTHING ABOVE THE FOOTER, AS ONE BLOCK ============ -->
+    <div>
+
+      <!-- ================= HERO ================= -->
+      <div style="text-align:center;">
+        <p class="kicker" style="display:inline-flex;align-items:center;gap:8px;">
+          [ BSIT Capstone Project ]
+          <span style="position:relative;display:inline-flex;width:7px;height:7px;">
+            <span style="position:absolute;inset:0;border-radius:999px;background:#f4f4f2;opacity:.6;animation:pulse-ring 1.8s ease-out infinite;"></span>
+            <span style="position:relative;width:7px;height:7px;border-radius:999px;background:#f4f4f2;"></span>
+          </span>
+        </p>
+        <h1 style="font-size:58px;font-weight:800;letter-spacing:-0.02em;line-height:1.12;margin:16px 0 0;">
+          Know you&rsquo;re exposed <span style="text-decoration:underline;text-decoration-color:rgba(244,244,242,.4);text-underline-offset:8px;text-decoration-thickness:4px;">before they do.</span>
+        </h1>
+        <p style="font-size:19px;font-weight:500;color:#97979e;margin:16px auto 0;max-width:1900px;">
+          AI-Powered Digital Identity Leak Scanner and Risk Scoring Web/App Platform &mdash; a proactive framework that scans verified breach databases and turns exposure into one risk score you can act on.
+        </p>
+
+        <div style="margin-top:20px;">
+          <p style="font-size:15px;color:#f4f4f2;margin:0;">Dela Cruz, Christian D. &middot; De Vera, Patrick H. &middot; Factur, Cleivent A. &middot; Givera, Joseph R. &middot; Regala, Ryan L.</p>
+          <p style="font-size:15px;color:#59595f;margin:14px 0 0;">Adviser Marc Lhester Sagun &middot; BS Information Technology, Our Lady of Lourdes College &middot; A.Y. 2026&ndash;2027, First Semester</p>
+        </div>
+      </div>
+
+      <!-- ================= GAUGE CENTERPIECE ================= -->
+      <div style="display:flex;flex-direction:column;align-items:center;margin-top:44px;">
+        <div style="position:relative;width:480px;height:240px;">
+          <!-- band-matched ambient glow, sits behind the filled arc only -->
+          <div style="position:absolute;bottom:-30px;left:24px;width:280px;height:280px;background:radial-gradient(circle, rgba(248,113,113,.16) 0%, rgba(248,113,113,0) 68%);pointer-events:none;"></div>
+          <!-- track: feathered edge instead of a hard color-stop cutoff, plus an inset shadow for depth -->
+          <div style="position:absolute;bottom:0;left:0;width:480px;height:240px;border-radius:480px 480px 0 0;box-shadow:inset 0 2px 10px rgba(0,0,0,.5);background:conic-gradient(from 270deg at 50% 100%, #f4f4f2 0deg, #f4f4f2 144.3deg, rgba(255,255,255,.10) 147.3deg, rgba(255,255,255,.10) 180deg);"></div>
+          <!-- soft outer glow riding the arc's fill edge -->
+          <div style="position:absolute;bottom:0;left:0;width:480px;height:240px;border-radius:480px 480px 0 0;filter:blur(6px);opacity:.5;background:conic-gradient(from 270deg at 50% 100%, rgba(244,244,242,.5) 0deg, rgba(244,244,242,.5) 144.3deg, transparent 147.3deg, transparent 180deg);pointer-events:none;"></div>
+          <div style="position:absolute;bottom:0;left:48px;width:384px;height:192px;border-radius:384px 384px 0 0;background:#000000;"></div>
+          <div style="position:absolute;bottom:16px;left:0;right:0;text-align:center;">
+            <p class="kicker" style="font-size:11.5px;color:#8a8a90;white-space:nowrap;">Risk score</p>
+            <span style="display:flex;align-items:baseline;justify-content:center;gap:3px;margin-top:2px;font-size:88px;font-weight:800;letter-spacing:-0.03em;line-height:1;font-variant-numeric:tabular-nums;">81<span style="font-size:48px;font-weight:500;color:#97979e;">/100</span></span>
+            <span style="display:inline-block;margin-top:10px;border-radius:999px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.2);color:#f87171;padding:4px 16px;font-size:12.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;">High risk</span>
+          </div>
+        </div>
+        <p class="kicker" style="margin-top:14px;font-size:12.5px;color:#8a8a90;white-space:nowrap;">Sample scan result</p>
+      </div>
+
+      <!-- ================= STAT STRIP ================= -->
+      <div class="row" style="display:grid;grid-template-columns:repeat(4, 1fr);gap:16px;">
+        <div style="border-radius:16px;background:#f4f4f2;padding:20px 18px;">
+          <span style="font-size:36px;font-weight:800;letter-spacing:-0.02em;color:#000;">24B+</span>
+          <p class="kicker" style="margin-top:6px;font-size:12px;color:#000;opacity:.6;">Breach records scanned</p>
+        </div>
+        <div class="card" style="padding:20px 18px;">
+          <span style="font-size:36px;font-weight:800;letter-spacing:-0.02em;">0&ndash;100</span>
+          <p class="kicker" style="margin-top:6px;font-size:12px;color:#8a8a90;">Risk score range</p>
+        </div>
+        <div style="border-radius:16px;background:#f4f4f2;padding:20px 18px;">
+          <span style="font-size:36px;font-weight:800;letter-spacing:-0.02em;color:#000;">3</span>
+          <p class="kicker" style="margin-top:6px;font-size:12px;color:#000;opacity:.6;">Risk factors weighed</p>
+        </div>
+        <div class="card" style="padding:20px 18px;">
+          <span style="font-size:36px;font-weight:800;letter-spacing:-0.02em;">5</span>
+          <p class="kicker" style="margin-top:6px;font-size:12px;color:#8a8a90;">ISO 25010 domains</p>
+        </div>
+      </div>
+
+      <!-- ================= ROW 1: PROBLEM + OBJECTIVES ================= -->
+      <div class="row" style="display:flex;gap:18px;">
+        <div class="card" style="flex:1.6;padding:17px 22px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="icon-badge"><svg viewBox="0 0 24 24" fill="none"><rect x="7" y="9" width="10" height="10" rx="5" stroke="currentColor" stroke-width="1.5"/><path d="M12 9V6M5 13H2m20 0h-3M5 19l2.5-2.5M19 19l-2.5-2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+            <div><p class="section-num" style="margin:0 0 1px;">[ 01 ]</p><h2 class="section-heading">The problem</h2></div>
+          </div>
+          <p class="body-text" style="margin-top:16px;">Antivirus and firewalls guard the device in front of you &mdash; not the identity that leaks once your email and password sit inside someone else&rsquo;s breached database. Most people never find out until the damage is done, because verifying exposure manually means combing through breach dumps built for security researchers, not everyday users.</p>
+        </div>
+        <div class="card" style="flex:1;padding:17px 22px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="icon-badge"><svg viewBox="0 0 24 24" fill="none"><path d="M11 4h6a2 2 0 012 2v6l-9 9-8-8 9-9z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><circle cx="15.5" cy="8.5" r="1.4" fill="currentColor"/></svg></span>
+            <div><p class="section-num" style="margin:0 0 1px;">[ 02 ]</p><h2 class="section-heading">Objectives</h2></div>
+          </div>
+          <p class="body-text" style="margin-top:16px;">Turn breach exposure into one number you can act on.</p>
+          <div style="margin-top:9px;display:flex;flex-direction:column;gap:5px;">
+            <p class="body-text">&mdash; Identify exposure through the DeHashed API</p>
+            <p class="body-text">&mdash; Score severity with Scikit-learn</p>
+            <p class="body-text">&mdash; Explain findings through OpenAI</p>
+            <p class="body-text">&mdash; Evaluate against ISO/IEC 25010</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= ROW 2: SYSTEM ARCHITECTURE (FULL-WIDTH DIAGRAM) ================= -->
+      <div class="row">
+        <div style="display:flex;align-items:center;justify-content:flex-start;gap:10px;margin-bottom:18px;">
+          <span class="icon-badge"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l8 4.5-8 4.5-8-4.5L12 3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M4 12l8 4.5 8-4.5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M4 16.5L12 21l8-4.5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span>
+          <div style="text-align:left;"><p class="section-num" style="margin:0 0 1px;">[ 03 ]</p><h2 class="section-heading">System architecture</h2></div>
+        </div>
+        <div style="display:flex;align-items:stretch;gap:18px;">
+          <div class="card" style="flex:1;padding:20px 24px;">
+            <p class="small-caps">Frontend</p>
+            <p style="font-size:17px;font-weight:600;margin:5px 0 0;">React + Tailwind CSS</p>
+            <p class="body-text" style="margin-top:5px;font-size:14.5px;">Passwordless UI &amp; dashboard</p>
+          </div>
+          <div style="display:flex;align-items:center;" class="arrow">&rarr;</div>
+          <div class="card" style="flex:1;padding:20px 24px;">
+            <p class="small-caps">Backend &amp; database</p>
+            <p style="font-size:17px;font-weight:600;margin:5px 0 0;">Supabase</p>
+            <p class="body-text" style="margin-top:5px;font-size:14.5px;">PostgreSQL &middot; Magic Link auth &middot; Edge Functions</p>
+          </div>
+          <div style="display:flex;align-items:center;" class="arrow">&rarr;</div>
+          <div class="card" style="flex:1;padding:20px 24px;">
+            <p class="small-caps">AI / ML layer</p>
+            <p style="font-size:17px;font-weight:600;margin:5px 0 0;">Scikit-learn + DistilBERT &rarr; OpenAI</p>
+            <p class="body-text" style="margin-top:5px;font-size:14.5px;">Risk score (0&ndash;100) &amp; plain-language insight</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= ROW 3: CONCEPTUAL FRAMEWORK + SIGNIFICANCE ================= -->
+      <div class="row" style="display:flex;gap:18px;">
+        <div class="card" style="flex:1.6;padding:17px 22px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="icon-badge"><svg viewBox="0 0 24 24" fill="none"><path d="M3 12h4l2-7 4 14 2-7h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <div><p class="section-num" style="margin:0 0 1px;">[ 04 ]</p><h2 class="section-heading">Conceptual framework</h2></div>
+          </div>
+          <div style="display:flex;align-items:stretch;gap:14px;margin-top:14px;">
+            <div class="card" style="flex:1;padding:14px 16px;">
+              <p class="small-caps">Input</p>
+              <p class="body-text" style="margin-top:4px;font-size:14.5px;">Email, IDs, breach sources, risk variables</p>
+            </div>
+            <div style="display:flex;align-items:center;" class="arrow">&rarr;</div>
+            <div class="card" style="flex:1;padding:14px 16px;">
+              <p class="small-caps">Process</p>
+              <p class="body-text" style="margin-top:4px;font-size:14.5px;">Agile SDLC &mdash; 6 phases</p>
+            </div>
+            <div style="display:flex;align-items:center;" class="arrow">&rarr;</div>
+            <div class="card" style="flex:1;padding:14px 16px;">
+              <p class="small-caps">Output</p>
+              <p class="body-text" style="margin-top:4px;font-size:14.5px;">Leaks, risk score, dashboard, PDF</p>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="flex:1;padding:17px 22px;display:flex;flex-direction:column;justify-content:center;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="icon-badge"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v5c0 4.5-3 8.4-7 10-4-1.6-7-5.5-7-10V6l7-3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <div><p class="section-num" style="margin:0 0 1px;">[ 05 ]</p><h2 class="section-heading">Who this protects</h2></div>
+          </div>
+          <p class="body-text" style="margin-top:16px;">Individual users, students and young professionals, IT students and developers, researchers, and security practitioners.</p>
+        </div>
+      </div>
+
+      <!-- ================= ROW 4: RELATED LITERATURE ================= -->
+      <div class="row">
+        <div style="display:flex;align-items:center;justify-content:flex-start;gap:10px;margin-bottom:16px;">
+          <span class="icon-badge"><svg viewBox="0 0 24 24" fill="none"><path d="M7 8.5c-1.7 0-3 1.3-3 3v4h4v-4H6c0-1 .7-1.8 1.7-2V8.5H7zm9 0c-1.7 0-3 1.3-3 3v4h4v-4h-2c0-1 .7-1.8 1.7-2V8.5H16z" fill="currentColor"/></svg></span>
+          <div style="text-align:left;"><p class="section-num" style="margin:0 0 1px;">[ 06 ]</p><h2 class="section-heading">Related literature</h2></div>
+        </div>
+        <div style="display:flex;gap:20px;">
+          <div class="card" style="flex:1;padding:16px 20px;">
+            <p class="small-caps">AI over signatures</p>
+            <p class="body-text" style="margin-top:5px;">Machine learning now outperforms static, signature-based tools at real-time breach detection.</p>
+            <p style="font-size:13px;color:#59595f;margin:8px 0 0;">Jana et al., 2024 &middot; Krishna Kumar, 2025</p>
+          </div>
+          <div class="card" style="flex:1;padding:16px 20px;">
+            <p class="small-caps">Explainability matters</p>
+            <p class="body-text" style="margin-top:5px;">Security systems must justify findings in human-readable terms.</p>
+            <p style="font-size:13px;color:#59595f;margin:8px 0 0;">Tounsi &amp; Rais, 2022 &middot; Sarker et al., 2024</p>
+          </div>
+          <div class="card" style="flex:1;padding:16px 20px;">
+            <p class="small-caps">A local protection gap</p>
+            <p class="body-text" style="margin-top:5px;">Filipino users show awareness but weak preventive practice.</p>
+            <p style="font-size:13px;color:#59595f;margin:8px 0 0;">Dapitan, 2024 &middot; Alves-Foss &amp; Llego, 2025</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= ROW 5: METHODOLOGY + SCOPE/STACK/LIMITS ================= -->
+      <div class="row" style="display:flex;gap:18px;">
+        <div class="card" style="flex:1;padding:17px 22px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="icon-badge"><svg viewBox="0 0 24 24" fill="none"><path d="M9 6h10M9 12h10M9 18h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="5" cy="6" r="1.2" fill="currentColor"/><circle cx="5" cy="12" r="1.2" fill="currentColor"/><circle cx="5" cy="18" r="1.2" fill="currentColor"/></svg></span>
+            <div><p class="section-num" style="margin:0 0 1px;">[ 07 ]</p><h2 class="section-heading">Methodology</h2></div>
+          </div>
+          <p class="small-caps" style="margin-top:12px;">Development approach</p>
+          <p class="body-text" style="margin-top:4px;">Agile SDLC, executed across six iterative phases from requirements analysis through maintenance.</p>
+          <p class="small-caps" style="margin-top:12px;">Data gathering</p>
+          <p class="body-text" style="margin-top:4px;">Structured and semi-structured interviews with security administrators and system owners, alongside an ISO/IEC 25010 survey completed by end-users and IT personnel, safeguarded under RA 10173.</p>
+        </div>
+        <div class="card" style="flex:1;padding:17px 22px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="icon-badge"><svg viewBox="0 0 24 24" fill="none"><rect x="5" y="10.5" width="14" height="9" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M8 10.5V8a4 4 0 018 0v2.5" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="15" r="1.4" fill="currentColor"/></svg></span>
+            <div><p class="section-num" style="margin:0 0 1px;">[ 08 ]</p><h2 class="section-heading">Scope, stack &amp; limits</h2></div>
+          </div>
+          <p class="small-caps" style="margin-top:12px;">Tech stack</p>
+          <p class="body-text" style="margin-top:4px;">React, Tailwind CSS, Supabase, PostgreSQL, Scikit-learn, DistilBERT, OpenAI, DeHashed, HaveIBeenPwned</p>
+          <div style="display:flex;gap:24px;margin-top:12px;">
+            <div style="flex:1;"><p class="small-caps">In scope</p><p class="body-text" style="margin-top:4px;">Email scanning, verified breaches, one identifier per search</p></div>
+            <div style="flex:1;"><p class="small-caps">Not yet</p><p class="body-text" style="margin-top:4px;">Social accounts, real-time detection</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= ROW 6: TIMELINE ================= -->
+      <div class="row">
+        <div style="display:flex;align-items:center;justify-content:center;gap:10px;">
+          <span class="icon-badge"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.5"/><path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <div style="text-align:left;"><p class="section-num" style="margin:0 0 1px;">[ 09 ]</p><p class="kicker">Where we are</p></div>
+        </div>
+        <div style="display:flex;align-items:center;width:100%;margin-top:22px;">
+
+          <div style="display:flex;flex-direction:column;align-items:center;gap:9px;flex-shrink:0;">
+            <span style="width:12px;height:12px;border-radius:999px;background:#f4f4f2;"></span>
+            <div style="text-align:center;"><span class="small-caps" style="font-size:13px;">Requirements</span><span style="display:block;font-size:12px;color:#8a8a90;margin-top:3px;">Done</span></div>
+          </div>
+          <div style="height:1px;flex:1;margin:0 12px;min-width:16px;background:rgba(244,244,242,.35);align-self:flex-start;margin-top:5px;"></div>
+
+          <div style="display:flex;flex-direction:column;align-items:center;gap:9px;flex-shrink:0;">
+            <span style="width:12px;height:12px;border-radius:999px;background:#f4f4f2;"></span>
+            <div style="text-align:center;"><span class="small-caps" style="font-size:13px;">Design</span><span style="display:block;font-size:12px;color:#8a8a90;margin-top:3px;">Done</span></div>
+          </div>
+          <div style="height:1px;flex:1;margin:0 12px;min-width:16px;background:rgba(244,244,242,.35);align-self:flex-start;margin-top:5px;"></div>
+
+          <div style="display:flex;flex-direction:column;align-items:center;gap:9px;flex-shrink:0;">
+            <span style="width:12px;height:12px;border-radius:999px;background:#f4f4f2;"></span>
+            <div style="text-align:center;"><span class="small-caps" style="font-size:13px;">Development</span><span style="display:block;font-size:12px;color:#8a8a90;margin-top:3px;">Done</span></div>
+          </div>
+          <div style="height:1px;flex:1;margin:0 12px;min-width:16px;background:rgba(244,244,242,.35);align-self:flex-start;margin-top:5px;"></div>
+
+          <div style="display:flex;flex-direction:column;align-items:center;gap:9px;flex-shrink:0;">
+            <span style="position:relative;width:12px;height:12px;">
+              <span style="position:absolute;inset:0;border-radius:999px;background:#f4f4f2;opacity:.5;animation:pulse-ring 1.8s ease-out infinite;"></span>
+              <span style="position:relative;width:12px;height:12px;border-radius:999px;background:#f4f4f2;display:block;"></span>
+            </span>
+            <div style="text-align:center;"><span class="small-caps" style="font-size:13px;">Testing</span><span style="display:block;font-size:12px;color:#8a8a90;margin-top:3px;">In progress</span></div>
+          </div>
+          <div style="height:1px;flex:1;margin:0 12px;min-width:16px;background:rgba(255,255,255,.14);align-self:flex-start;margin-top:5px;"></div>
+
+          <div style="display:flex;flex-direction:column;align-items:center;gap:9px;flex-shrink:0;">
+            <span style="width:12px;height:12px;border-radius:999px;border:1px solid rgba(255,255,255,.32);"></span>
+            <div style="text-align:center;"><span style="font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:#97979e;font-weight:600;">Deployment</span><span style="display:block;font-size:12px;color:#8a8a90;margin-top:3px;">Pending</span></div>
+          </div>
+          <div style="height:1px;flex:1;margin:0 12px;min-width:16px;background:rgba(255,255,255,.14);align-self:flex-start;margin-top:5px;"></div>
+
+          <div style="display:flex;flex-direction:column;align-items:center;gap:9px;flex-shrink:0;">
+            <span style="width:12px;height:12px;border-radius:999px;border:1px solid rgba(255,255,255,.32);"></span>
+            <div style="text-align:center;"><span style="font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:#97979e;font-weight:600;">Maintenance</span><span style="display:block;font-size:12px;color:#8a8a90;margin-top:3px;">Pending</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= ROW 7: DELIVERS + STATUS ================= -->
+      <div class="row" style="display:flex;gap:18px;">
+        <div class="card" style="flex:1;padding:17px 22px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="icon-badge"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></span>
+            <div><p class="section-num" style="margin:0 0 1px;">[ 10 ]</p><h2 class="section-heading">What this delivers</h2></div>
+          </div>
+          <p class="body-text" style="margin-top:16px;">Plain-language exposure explanations for individual users; a working blueprint for pairing breach-intelligence APIs with generative AI for IT practitioners; and a shorter breach-to-notification window to cut downstream fraud across the user community.</p>
+        </div>
+        <div class="card" style="flex:1;padding:17px 22px;border-left:2px solid rgba(244,244,242,.3);">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="icon-badge"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <div><p class="section-num" style="margin:0 0 1px;">[ 11 ]</p><h2 class="section-heading">Status &amp; what&rsquo;s next</h2></div>
+          </div>
+          <p class="body-text" style="margin-top:16px;"><span style="color:#f4f4f2;font-weight:600;">As of this poster:</span> the three-tier platform is implemented and integrated with DeHashed and HIBP. The ISO/IEC 25010 evaluation is in progress; results follow data collection.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ================= FOOTER ================= -->
+    <div style="margin-top:40px;padding-top:22px;border-top:1px solid rgba(255,255,255,.10);display:flex;justify-content:space-between;align-items:flex-start;gap:60px;">
+      <div style="max-width:1200px;">
+        <p style="font-size:15px;font-weight:600;color:#97979e;margin:0;">AI-Powered Digital Identity Leak Scanner and Risk Scoring Web/App Platform</p>
+        <p style="font-size:13px;color:#59595f;margin:6px 0 0;">Our Lady of Lourdes College &mdash; College of Computer Studies &middot; 5013 Gen T. De Leon, Valenzuela City</p>
+      </div>
+      <div style="text-align:right;flex-shrink:0;">
+        <p style="font-size:12.5px;color:#59595f;margin:0;line-height:1.6;">References &mdash; Jana et al. (2024); Krishna Kumar (2025); Tounsi &amp; Rais (2022); Dapitan (2024). Full list in manuscript.</p>
+        <p style="font-size:12.5px;color:#59595f;margin:6px 0 0;">Contact &mdash; [proponent email] &middot; Adviser &mdash; [adviser email]</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

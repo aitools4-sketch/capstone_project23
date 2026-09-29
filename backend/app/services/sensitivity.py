@@ -1,5 +1,5 @@
 """Shared field-sensitivity weights.
-
++
 Both breach_lookup (to tag a record's severity) and risk_scoring (to compute
 the sensitivity sub-score) need the same notion of "how bad is it that this
 field type leaked" — defined once here so the two never drift apart.

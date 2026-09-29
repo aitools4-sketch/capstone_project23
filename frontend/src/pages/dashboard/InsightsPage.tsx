@@ -104,7 +104,7 @@ function InsightsPage() {
 
       {status === 'loading' && (
         <p className="rounded-2xl border border-white/8 bg-white/3 px-6 py-10 text-center text-sm text-ink-faint">
-          Loading…
+          Generating your AI insight… this can take up to 10-15 seconds the first time. Later visits load instantly.
         </p>
       )}
 
