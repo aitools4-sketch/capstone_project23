@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import Avatar from '../app/Avatar'
 import { BRAND_NAME } from '../brand'
+import CommandPalette, { type PaletteItem } from './CommandPalette'
 import FeedbackWidget from './FeedbackWidget'
 import {
   BellIcon,
@@ -39,6 +40,24 @@ function DashboardShell() {
   const [unread, setUnread] = useState(0)
   const [downloading, setDownloading] = useState(false)
   const [downloadError, setDownloadError] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
+
+  // "F" opens Find, matching the shortcut hint shown on the button itself —
+  // ignored while typing anywhere else (inputs, textareas, contenteditable)
+  // or with a modifier held, so it doesn't hijack normal typing or browser
+  // shortcuts like Ctrl+F.
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key.toLowerCase() !== 'f' || e.metaKey || e.ctrlKey || e.altKey) return
+      const target = e.target as HTMLElement | null
+      const tag = target?.tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || target?.isContentEditable) return
+      e.preventDefault()
+      setSearchOpen(true)
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   useEffect(() => {
     function refreshUnread() {
@@ -55,6 +74,13 @@ function DashboardShell() {
   }, [])
   const currentPage =
     [...NAV_ITEMS].reverse().find((item) => location.pathname.startsWith(item.to))?.label ?? 'Overview'
+
+  const paletteItems: PaletteItem[] = [
+    ...NAV_ITEMS,
+    { label: 'Account settings', icon: ChevronDownIcon, to: '/dashboard/account', keywords: 'email profile' },
+    { label: 'Download PDF report', icon: DownloadIcon, onSelect: handleDownload, keywords: 'export' },
+    { label: 'Sign out', icon: LogOutIcon, onSelect: handleSignOut },
+  ]
 
   async function handleSignOut() {
     // Navigate off the RequireAuth-protected route BEFORE the session
@@ -150,6 +176,7 @@ function DashboardShell() {
         <aside className="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-64 shrink-0 flex-col gap-4 overflow-y-auto border-r border-white/6 px-3 py-4 lg:flex">
           <button
             type="button"
+            onClick={() => setSearchOpen(true)}
             className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/4 px-3 py-2 text-left text-sm text-ink-faint transition-colors duration-150 hover:border-white/20"
           >
             <SearchIcon className="h-4 w-4" />
@@ -198,6 +225,10 @@ function DashboardShell() {
       </div>
 
       <FeedbackWidget />
+
+      {searchOpen && (
+        <CommandPalette onClose={() => setSearchOpen(false)} items={paletteItems} onNavigate={navigate} />
+      )}
     </div>
   )
 }
